@@ -2,7 +2,6 @@ mod eval;
 mod lexer;
 mod parser;
 
-use eval::Value;
 use lexer::Lexer;
 use parser::Parser;
 use std::{env, fs, process};
@@ -23,14 +22,7 @@ fn main() {
     let mut lexer = Lexer::new(&source);
     let tokens = lexer.tokenize();
     let mut parser = Parser { tokens, pos: 0 };
-
     let program = parser.parse_program();
 
-    if let Some(value) = program.run() {
-        match value {
-            Value::Bool(bool) => println!("{:?}", bool),
-            Value::Number(n) => println!("{n}"),
-            Value::String(s) => println!("{s}"),
-        }
-    }
+    program.run();
 }

@@ -137,7 +137,36 @@ impl Parser {
         match self.consume() {
             Some(Token::Number(n)) => Expr::Number(n),
             Some(Token::String(s)) => Expr::String(s),
-            Some(Token::Ident(name)) => Expr::Variable(name),
+            Some(Token::Ident(name)) => {
+                // check if this is a function call
+                if matches!(self.peek(), Some(Token::LParen)) {
+                    self.consume(); // consume '('
+
+                    let mut args = Vec::new();
+
+                    // parse arguments if any
+                    if !matches!(self.peek(), Some(Token::RParen)) {
+                        loop {
+                            args.push(self.parse_expr(0));
+
+                            if matches!(self.peek(), Some(Token::Comma)) {
+                                self.consume(); // consume comma
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+
+                    match self.consume() {
+                        Some(Token::RParen) => {}
+                        _ => panic!("expected ')'"),
+                    }
+
+                    Expr::Call { name, args }
+                } else {
+                    Expr::Variable(name)
+                }
+            }
             Some(Token::LParen) => {
                 let expr = self.parse_expr(0);
 

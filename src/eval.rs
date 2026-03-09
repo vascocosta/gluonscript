@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, io::stdin};
 
 #[derive(Debug)]
 pub enum Expr {
@@ -9,6 +9,10 @@ pub enum Expr {
         left: Box<Expr>,
         op: Operator,
         right: Box<Expr>,
+    },
+    Call {
+        name: String,
+        args: Vec<Expr>,
     },
 }
 
@@ -34,7 +38,55 @@ impl Expr {
                     _ => panic!("type error"),
                 }
             }
+            Expr::Call { name, args } => {
+                let values: Vec<Value> = args.iter().map(|a| Expr::eval_expr(a, env)).collect();
+
+                call_builtin(name, &values)
+            }
         }
+    }
+}
+
+fn call_builtin(name: &str, args: &[Value]) -> Value {
+    match name {
+        "input" => {
+            let mut buf: String = String::new();
+            stdin().read_line(&mut buf).unwrap();
+
+            Value::String(buf)
+        }
+        "print" | "println" => {
+            for a in args {
+                match a {
+                    Value::Number(n) => print!("{}", n),
+                    Value::Bool(b) => print!("{}", b),
+                    Value::String(s) => print!("{}", s),
+                }
+            }
+
+            if name == "println" {
+                println!();
+            }
+
+            Value::Bool(true)
+        }
+        "number" => match &args[0] {
+            Value::String(s) => Value::Number(
+                s.trim_ascii()
+                    .parse()
+                    .expect("number expects a valid number string"),
+            ),
+            _ => panic!("number expects a string"),
+        },
+        "len" => match &args[0] {
+            Value::String(s) => Value::Number(s.len() as i64),
+            _ => panic!("len expects a string"),
+        },
+        "string" => match &args[0] {
+            Value::Number(n) => Value::String(n.to_string()),
+            _ => panic!("string expects a number"),
+        },
+        _ => panic!("unknown function {}", name),
     }
 }
 

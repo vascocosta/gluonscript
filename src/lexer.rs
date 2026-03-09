@@ -15,6 +15,7 @@ pub enum Token {
     RBrace,
     LParen,
     RParen,
+    Comma,
 }
 
 pub struct Lexer {
@@ -113,6 +114,11 @@ impl Lexer {
                 '"' => {
                     self.consume();
                     tokens.push(self.lex_string());
+                }
+
+                ',' => {
+                    self.consume();
+                    tokens.push(Token::Comma);
                 }
 
                 _ => panic!("Unexpected character: {}", c),
