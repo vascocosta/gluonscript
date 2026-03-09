@@ -1,6 +1,7 @@
 #[derive(Clone, Debug)]
 pub enum Token {
     Number(i64),
+    String(String),
     Ident(String),
     Plus,
     Minus,
@@ -109,6 +110,11 @@ impl Lexer {
                     tokens.push(Token::RParen);
                 }
 
+                '"' => {
+                    self.consume();
+                    tokens.push(self.lex_string());
+                }
+
                 _ => panic!("Unexpected character: {}", c),
             }
         }
@@ -130,6 +136,27 @@ impl Lexer {
         let num: String = self.chars[start..self.pos].iter().collect();
 
         Token::Number(num.parse().expect("expected a number"))
+    }
+
+    fn lex_string(&mut self) -> Token {
+        let start = self.pos;
+
+        while let Some(c) = self.peek() {
+            if c == '"' {
+                break;
+            } else {
+                self.consume();
+            }
+        }
+
+        let string: String = self.chars[start..self.pos].iter().collect();
+
+        match self.consume() {
+            Some('"') => {}
+            _ => panic!("unterminated string"),
+        }
+
+        Token::String(string)
     }
 
     fn lex_identifier(&mut self) -> Token {

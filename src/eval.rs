@@ -3,6 +3,7 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub enum Expr {
     Number(i64),
+    String(String),
     Variable(String),
     Binary {
         left: Box<Expr>,
@@ -15,6 +16,7 @@ impl Expr {
     fn eval_expr(expr: &Expr, env: &Env) -> Value {
         match expr {
             Expr::Number(n) => Value::Number(*n),
+            Expr::String(s) => Value::String(s.to_owned()),
             Expr::Variable(name) => env.vars.get(name).expect("undefined variable").clone(),
             Expr::Binary { left, op, right } => {
                 let l = Self::eval_expr(left, env);
@@ -26,6 +28,9 @@ impl Expr {
                     (Value::Number(a), Value::Number(b), Operator::Mul) => Value::Number(a * b),
                     (Value::Number(a), Value::Number(b), Operator::Greater) => Value::Bool(a > b),
                     (Value::Number(a), Value::Number(b), Operator::Smaller) => Value::Bool(a < b),
+                    (Value::String(a), Value::String(b), Operator::Add) => {
+                        Value::String(format!("{}{}", a, b))
+                    }
                     _ => panic!("type error"),
                 }
             }
@@ -74,6 +79,7 @@ impl Operator {
 #[derive(Debug, Clone)]
 pub enum Value {
     Number(i64),
+    String(String),
     Bool(bool),
 }
 

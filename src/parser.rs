@@ -136,6 +136,7 @@ impl Parser {
     fn parse_primary(&mut self) -> Expr {
         match self.consume() {
             Some(Token::Number(n)) => Expr::Number(n),
+            Some(Token::String(s)) => Expr::String(s),
             Some(Token::Ident(name)) => Expr::Variable(name),
             Some(Token::LParen) => {
                 let expr = self.parse_expr(0);
