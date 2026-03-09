@@ -4,19 +4,22 @@ mod parser;
 
 use lexer::Lexer;
 use parser::Parser;
+use std::{env, fs, process};
 
 fn main() {
-    let source = "
-        x = 10
+    let mut params = env::args();
 
-        while x > 10 {
-            x = x - 1
-        }
+    let source_file = params.nth(1).unwrap_or_else(|| {
+        eprintln!("Usage: gluonscript <source_file>");
+        process::exit(1);
+    });
 
-        x
-    ";
+    let source = fs::read_to_string(source_file).unwrap_or_else(|_| {
+        eprintln!("Could not open source file.");
+        process::exit(1);
+    });
 
-    let mut lexer = Lexer::new(source);
+    let mut lexer = Lexer::new(&source);
     let tokens = lexer.tokenize();
     let mut parser = Parser { tokens, pos: 0 };
 
