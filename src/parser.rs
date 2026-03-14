@@ -72,6 +72,7 @@ impl Parser {
         }
 
         let mut then_branch = Vec::new();
+        let mut else_branch = Vec::new();
 
         while !matches!(self.peek(), Some(Token::RBrace)) {
             then_branch.push(self.parse_stmt());
@@ -79,9 +80,24 @@ impl Parser {
 
         self.consume(); // Discard Token::RBrace
 
+        match self.consume() {
+            Some(Token::Else) => match self.consume() {
+                Some(Token::LBrace) => {
+                    while !matches!(self.peek(), Some(Token::RBrace)) {
+                        else_branch.push(self.parse_stmt());
+                    }
+
+                    self.consume();
+                }
+                _ => panic!("expected {{"),
+            },
+            _ => {}
+        }
+
         Stmt::If {
             condition,
             then_branch,
+            else_branch,
         }
     }
 

@@ -118,6 +118,7 @@ pub enum Stmt {
     If {
         condition: Expr,
         then_branch: Vec<Stmt>,
+        else_branch: Vec<Stmt>,
     },
     While {
         condition: Expr,
@@ -174,11 +175,16 @@ impl Program {
             Stmt::If {
                 condition,
                 then_branch,
+                else_branch,
             } => {
                 let cond = Expr::eval_expr(condition, env);
 
                 if let Value::Bool(true) = cond {
                     for stmt in then_branch {
+                        Self::exec_stmt(stmt, env);
+                    }
+                } else {
+                    for stmt in else_branch {
                         Self::exec_stmt(stmt, env);
                     }
                 }

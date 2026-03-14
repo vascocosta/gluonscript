@@ -10,6 +10,7 @@ pub enum Token {
     Smaller,
     Equals,
     If,
+    Else,
     While,
     Fn,
     LBrace,
@@ -181,6 +182,7 @@ impl Lexer {
 
         match ident.as_str() {
             "if" => Token::If,
+            "else" => Token::Else,
             "while" => Token::While,
             "fn" => Token::Fn,
             _ => Token::Ident(ident),
