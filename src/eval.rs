@@ -21,7 +21,7 @@ impl Expr {
         match expr {
             Expr::Number(n) => Value::Number(*n),
             Expr::String(s) => Value::String(s.to_owned()),
-            Expr::Variable(name) => env.vars.get(name).expect("undefined variable").clone(),
+            Expr::Variable(name) => env.get(name),
             Expr::Binary { left, op, right } => {
                 let l = Self::eval_expr(left, env);
                 let r = Self::eval_expr(right, env);
@@ -42,13 +42,10 @@ impl Expr {
                 let values: Vec<Value> = args.iter().map(|a| Self::eval_expr(a, env)).collect();
 
                 if let Some(func) = env.functions.get(name) {
-                    let mut local_env = Env {
-                        vars: HashMap::new(),
-                        functions: env.functions.clone(),
-                    };
+                    let mut local_env = env.child();
 
                     for (param, value) in func.params.iter().zip(values) {
-                        local_env.vars.insert(param.clone(), value);
+                        local_env.set(param.clone(), value);
                     }
 
                     let mut result = Value::Bool(false);
@@ -240,9 +237,11 @@ struct Function {
     body: Vec<Stmt>,
 }
 
+#[derive(Clone)]
 struct Env {
     vars: HashMap<String, Value>,
     functions: HashMap<String, Function>,
+    parent: Option<Box<Env>>,
 }
 
 impl Env {
@@ -250,6 +249,33 @@ impl Env {
         Self {
             vars: HashMap::new(),
             functions: HashMap::new(),
+            parent: None,
         }
+    }
+
+    fn child(&self) -> Self {
+        Self {
+            vars: HashMap::new(),
+            functions: self.functions.clone(),
+            parent: Some(Box::new(self.clone())),
+        }
+    }
+
+    fn get(&self, name: &str) -> Value {
+        if let Some(v) = self.vars.get(name) {
+            return v.clone();
+        }
+
+        if let Some(parent) = &self.parent {
+            if let Some(v) = parent.vars.get(name) {
+                return v.clone();
+            }
+        }
+
+        panic!("undefined variable: {}", name)
+    }
+
+    fn set(&mut self, name: String, value: Value) {
+        self.vars.insert(name, value);
     }
 }
