@@ -11,6 +11,7 @@ pub enum Token {
     Equals,
     If,
     While,
+    Fn,
     LBrace,
     RBrace,
     LParen,
@@ -181,6 +182,7 @@ impl Lexer {
         match ident.as_str() {
             "if" => Token::If,
             "while" => Token::While,
+            "fn" => Token::Fn,
             _ => Token::Ident(ident),
         }
     }

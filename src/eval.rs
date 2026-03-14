@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io::stdin};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Expr {
     Number(i64),
     String(String),
@@ -39,9 +39,30 @@ impl Expr {
                 }
             }
             Expr::Call { name, args } => {
-                let values: Vec<Value> = args.iter().map(|a| Expr::eval_expr(a, env)).collect();
+                let values: Vec<Value> = args.iter().map(|a| Self::eval_expr(a, env)).collect();
 
-                call_builtin(name, &values)
+                if let Some(func) = env.functions.get(name) {
+                    let mut local_env = Env {
+                        vars: HashMap::new(),
+                        functions: env.functions.clone(),
+                    };
+
+                    for (param, value) in func.params.iter().zip(values) {
+                        local_env.vars.insert(param.clone(), value);
+                    }
+
+                    let mut result = Value::Bool(false);
+
+                    for stmt in &func.body {
+                        if let Some(v) = Program::exec_stmt(stmt, &mut local_env) {
+                            result = v;
+                        }
+                    }
+
+                    result
+                } else {
+                    call_builtin(name, &values)
+                }
             }
         }
     }
@@ -90,7 +111,7 @@ fn call_builtin(name: &str, args: &[Value]) -> Value {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Stmt {
     Assign {
         name: String,
@@ -103,6 +124,11 @@ pub enum Stmt {
     },
     While {
         condition: Expr,
+        body: Vec<Stmt>,
+    },
+    Function {
+        name: String,
+        params: Vec<String>,
         body: Vec<Stmt>,
     },
 }
@@ -147,9 +173,7 @@ impl Program {
                 env.vars.insert(name.clone(), v);
                 None
             }
-
             Stmt::Expr(expr) => Some(Expr::eval_expr(expr, env)),
-
             Stmt::If {
                 condition,
                 then_branch,
@@ -164,7 +188,6 @@ impl Program {
 
                 None
             }
-
             Stmt::While { condition, body } => {
                 loop {
                     let cond = Expr::eval_expr(condition, env);
@@ -184,6 +207,16 @@ impl Program {
 
                 None
             }
+            Stmt::Function { name, params, body } => {
+                env.functions.insert(
+                    name.clone(),
+                    Function {
+                        params: params.clone(),
+                        body: body.clone(),
+                    },
+                );
+                None
+            }
         }
     }
 
@@ -201,14 +234,22 @@ impl Program {
     }
 }
 
+#[derive(Clone)]
+struct Function {
+    params: Vec<String>,
+    body: Vec<Stmt>,
+}
+
 struct Env {
     vars: HashMap<String, Value>,
+    functions: HashMap<String, Function>,
 }
 
 impl Env {
     fn new() -> Self {
         Self {
             vars: HashMap::new(),
+            functions: HashMap::new(),
         }
     }
 }

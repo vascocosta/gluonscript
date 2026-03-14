@@ -42,6 +42,7 @@ impl Parser {
                     Stmt::Expr(self.parse_expr(0))
                 }
             }
+            Some(Token::Fn) => self.parse_function(),
             _ => Stmt::Expr(self.parse_expr(0)),
         }
     }
@@ -103,6 +104,57 @@ impl Parser {
         self.consume(); // }
 
         Stmt::While { condition, body }
+    }
+
+    fn parse_function(&mut self) -> Stmt {
+        self.consume();
+
+        let name = match self.consume() {
+            Some(Token::Ident(n)) => n,
+            _ => panic!("expected function name"),
+        };
+
+        match self.consume() {
+            Some(Token::LParen) => {}
+            _ => panic!("expected '('"),
+        }
+
+        let mut params = Vec::new();
+
+        if !matches!(self.peek(), Some(Token::RParen)) {
+            loop {
+                match self.consume() {
+                    Some(Token::Ident(p)) => params.push(p),
+                    _ => panic!("expected parameter name"),
+                }
+
+                if matches!(self.peek(), Some(Token::Comma)) {
+                    self.consume();
+                } else {
+                    break;
+                }
+            }
+        }
+
+        match self.consume() {
+            Some(Token::RParen) => {}
+            _ => panic!("expected ')'"),
+        }
+
+        match self.consume() {
+            Some(Token::LBrace) => {}
+            _ => panic!("expected {{"),
+        }
+
+        let mut body = Vec::new();
+
+        while !matches!(self.peek(), Some(Token::RBrace)) {
+            body.push(self.parse_stmt());
+        }
+
+        self.consume();
+
+        Stmt::Function { name, params, body }
     }
 
     fn parse_expr(&mut self, min_prec: u8) -> Expr {
