@@ -17,6 +17,8 @@ pub enum Token {
     RBrace,
     LParen,
     RParen,
+    LBracket,
+    RBracket,
     Comma,
 }
 
@@ -111,6 +113,16 @@ impl Lexer {
                 ')' => {
                     self.consume();
                     tokens.push(Token::RParen);
+                }
+
+                '[' => {
+                    self.consume();
+                    tokens.push(Token::LBracket);
+                }
+
+                ']' => {
+                    self.consume();
+                    tokens.push(Token::RBracket);
                 }
 
                 '"' => {

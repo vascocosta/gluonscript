@@ -14,6 +14,11 @@ pub enum Expr {
         name: String,
         args: Vec<Expr>,
     },
+    ListLiteral(Vec<Expr>),
+    Index {
+        target: Box<Expr>,
+        index: Box<Expr>,
+    },
 }
 
 impl Expr {
@@ -61,6 +66,23 @@ impl Expr {
                     call_builtin(name, &values)
                 }
             }
+            Expr::ListLiteral(elements) => {
+                let values = elements.iter().map(|e| Self::eval_expr(e, env)).collect();
+
+                Value::List(values)
+            }
+            Expr::Index { target, index } => {
+                let list = Self::eval_expr(target, env);
+                let idx = Self::eval_expr(index, env);
+
+                match (list, idx) {
+                    (Value::List(v), Value::Number(i)) => {
+                        v.get(i as usize).cloned().expect("index out of bounds")
+                    }
+
+                    _ => panic!("invalid indexing"),
+                }
+            }
         }
     }
 }
@@ -79,6 +101,7 @@ fn call_builtin(name: &str, args: &[Value]) -> Value {
                     Value::Number(n) => print!("{}", n),
                     Value::Bool(b) => print!("{}", b),
                     Value::String(s) => print!("{}", s),
+                    Value::List(l) => println!("{:#?}", l),
                 }
             }
 
@@ -97,8 +120,9 @@ fn call_builtin(name: &str, args: &[Value]) -> Value {
             _ => panic!("number expects a string"),
         },
         "len" => match &args[0] {
+            Value::List(v) => Value::Number(v.len() as i64),
             Value::String(s) => Value::Number(s.len() as i64),
-            _ => panic!("len expects a string"),
+            _ => panic!("len() unsupported type"),
         },
         "string" => match &args[0] {
             Value::Number(n) => Value::String(n.to_string()),
@@ -157,6 +181,7 @@ pub enum Value {
     Number(i64),
     String(String),
     Bool(bool),
+    List(Vec<Value>),
 }
 
 pub struct Program {

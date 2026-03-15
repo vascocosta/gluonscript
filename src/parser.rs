@@ -177,6 +177,28 @@ impl Parser {
         let mut left = self.parse_primary();
 
         loop {
+            match self.peek() {
+                Some(Token::LBracket) => {
+                    self.consume(); // [
+
+                    let index = self.parse_expr(0);
+
+                    match self.consume() {
+                        Some(Token::RBracket) => {}
+                        _ => panic!("expected ']'"),
+                    }
+
+                    left = Expr::Index {
+                        target: Box::new(left),
+                        index: Box::new(index),
+                    };
+                }
+
+                _ => break,
+            }
+        }
+
+        loop {
             let op = match self.peek().and_then(Self::token_to_operator) {
                 Some(op) => op,
                 None => break,
@@ -242,6 +264,28 @@ impl Parser {
                     Some(Token::RParen) => expr,
                     _ => panic!("expected ')'"),
                 }
+            }
+            Some(Token::LBracket) => {
+                let mut elements = Vec::new();
+
+                if !matches!(self.peek(), Some(Token::RBracket)) {
+                    loop {
+                        elements.push(self.parse_expr(0));
+
+                        if matches!(self.peek(), Some(Token::Comma)) {
+                            self.consume();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                match self.consume() {
+                    Some(Token::RBracket) => {}
+                    _ => panic!("expected ']'"),
+                }
+
+                Expr::ListLiteral(elements)
             }
 
             other => panic!("unexpected token: {:?}", other),
