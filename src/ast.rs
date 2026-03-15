@@ -1,4 +1,6 @@
-use std::{collections::HashMap, io::stdin};
+use std::collections::HashMap;
+
+use crate::{builtin, program::Program};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -22,7 +24,7 @@ pub enum Expr {
 }
 
 impl Expr {
-    fn eval_expr(expr: &Expr, env: &Env) -> Value {
+    pub fn eval_expr(expr: &Expr, env: &Env) -> Value {
         match expr {
             Expr::Number(n) => Value::Number(*n),
             Expr::String(s) => Value::String(s.to_owned()),
@@ -65,7 +67,7 @@ impl Expr {
 
                     result
                 } else {
-                    call_builtin(name, &values)
+                    builtin::call_builtin(name, &values)
                 }
             }
             Expr::ListLiteral(elements) => {
@@ -86,65 +88,6 @@ impl Expr {
                 }
             }
         }
-    }
-}
-
-fn call_builtin(name: &str, args: &[Value]) -> Value {
-    match name {
-        "input" => {
-            let mut buf: String = String::new();
-            stdin().read_line(&mut buf).unwrap();
-
-            Value::String(buf)
-        }
-        "print" | "println" => {
-            for a in args {
-                match a {
-                    Value::Number(n) => print!("{}", n),
-                    Value::Bool(b) => print!("{}", b),
-                    Value::String(s) => print!("{}", s),
-                    Value::List(l) => println!("{:#?}", l),
-                }
-            }
-
-            if name == "println" {
-                println!();
-            }
-
-            Value::Bool(true)
-        }
-        "number" => match &args[0] {
-            Value::String(s) => Value::Number(
-                s.trim_ascii()
-                    .parse()
-                    .expect("number expects a valid number string"),
-            ),
-            _ => panic!("number expects a string"),
-        },
-        "len" => match &args[0] {
-            Value::List(v) => Value::Number(v.len() as i64),
-            Value::String(s) => Value::Number(s.len() as i64),
-            _ => panic!("len() unsupported type"),
-        },
-        "append" => match &args[0] {
-            Value::List(v) => {
-                if args.len() != 2 {
-                    panic!("append expects 2 arguments")
-                }
-
-                let mut new_list = v.clone();
-
-                new_list.push(args[1].clone());
-
-                Value::List(new_list)
-            }
-            _ => panic!("append expects a list"),
-        },
-        "string" => match &args[0] {
-            Value::Number(n) => Value::String(n.to_string()),
-            _ => panic!("string expects a number"),
-        },
-        _ => panic!("unknown function {}", name),
     }
 }
 
@@ -204,99 +147,21 @@ pub enum Value {
     List(Vec<Value>),
 }
 
-pub struct Program {
-    pub statements: Vec<Stmt>,
-}
-
-impl Program {
-    fn exec_stmt(stmt: &Stmt, env: &mut Env) -> Option<Value> {
-        match stmt {
-            Stmt::Assign { name, value } => {
-                let v = Expr::eval_expr(value, env);
-                env.vars.insert(name.clone(), v);
-                None
-            }
-            Stmt::Expr(expr) => Some(Expr::eval_expr(expr, env)),
-            Stmt::If {
-                condition,
-                then_branch,
-                else_branch,
-            } => {
-                let cond = Expr::eval_expr(condition, env);
-
-                if let Value::Bool(true) = cond {
-                    for stmt in then_branch {
-                        Self::exec_stmt(stmt, env);
-                    }
-                } else {
-                    for stmt in else_branch {
-                        Self::exec_stmt(stmt, env);
-                    }
-                }
-
-                None
-            }
-            Stmt::While { condition, body } => {
-                loop {
-                    let cond = Expr::eval_expr(condition, env);
-
-                    match cond {
-                        Value::Bool(true) => {
-                            for stmt in body {
-                                Self::exec_stmt(stmt, env);
-                            }
-                        }
-
-                        Value::Bool(false) => break,
-
-                        _ => panic!("while condition must be bool"),
-                    }
-                }
-
-                None
-            }
-            Stmt::Function { name, params, body } => {
-                env.functions.insert(
-                    name.clone(),
-                    Function {
-                        params: params.clone(),
-                        body: body.clone(),
-                    },
-                );
-                None
-            }
-        }
-    }
-
-    pub fn run(&self) -> Option<Value> {
-        let mut env = Env::new();
-        let mut last = None;
-
-        for stmt in &self.statements {
-            if let Some(v) = Self::exec_stmt(stmt, &mut env) {
-                last = Some(v);
-            }
-        }
-
-        last
-    }
+#[derive(Clone)]
+pub struct Function {
+    pub params: Vec<String>,
+    pub body: Vec<Stmt>,
 }
 
 #[derive(Clone)]
-struct Function {
-    params: Vec<String>,
-    body: Vec<Stmt>,
-}
-
-#[derive(Clone)]
-struct Env {
-    vars: HashMap<String, Value>,
-    functions: HashMap<String, Function>,
-    parent: Option<Box<Env>>,
+pub struct Env {
+    pub vars: HashMap<String, Value>,
+    pub functions: HashMap<String, Function>,
+    pub parent: Option<Box<Env>>,
 }
 
 impl Env {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             vars: HashMap::new(),
             functions: HashMap::new(),

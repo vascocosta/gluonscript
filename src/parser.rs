@@ -1,5 +1,6 @@
-use crate::eval::{Expr, Operator, Program, Stmt};
+use crate::ast::{Expr, Operator, Stmt};
 use crate::lexer::Token;
+use crate::program::Program;
 
 pub struct Parser {
     pub tokens: Vec<Token>,

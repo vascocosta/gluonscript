@@ -1,6 +1,8 @@
-mod eval;
+mod ast;
+mod builtin;
 mod lexer;
 mod parser;
+mod program;
 
 use lexer::Lexer;
 use parser::Parser;
