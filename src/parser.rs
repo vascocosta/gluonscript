@@ -78,20 +78,21 @@ impl Parser {
             then_branch.push(self.parse_stmt());
         }
 
-        self.consume(); // Discard Token::RBrace
+        self.consume();
 
-        match self.consume() {
-            Some(Token::Else) => match self.consume() {
-                Some(Token::LBrace) => {
-                    while !matches!(self.peek(), Some(Token::RBrace)) {
-                        else_branch.push(self.parse_stmt());
-                    }
+        if matches!(self.peek(), Some(Token::Else)) {
+            self.consume();
 
-                    self.consume();
-                }
+            match self.consume() {
+                Some(Token::LBrace) => {}
                 _ => panic!("expected {{"),
-            },
-            _ => {}
+            }
+
+            while !matches!(self.peek(), Some(Token::RBrace)) {
+                else_branch.push(self.parse_stmt());
+            }
+
+            self.consume();
         }
 
         Stmt::If {
