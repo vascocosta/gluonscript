@@ -37,6 +37,7 @@ impl Expr {
                     (Value::Number(a), Value::Number(b), Operator::Mul) => Value::Number(a * b),
                     (Value::Number(a), Value::Number(b), Operator::Greater) => Value::Bool(a > b),
                     (Value::Number(a), Value::Number(b), Operator::Smaller) => Value::Bool(a < b),
+                    (Value::Number(a), Value::Number(b), Operator::Percent) => Value::Number(a % b),
                     (Value::String(a), Value::String(b), Operator::Add) => {
                         Value::String(format!("{}{}", a, b))
                     }
@@ -160,6 +161,7 @@ pub enum Operator {
     Add,
     Mul,
     Sub,
+    Percent,
     Greater,
     Smaller,
 }
@@ -172,6 +174,7 @@ impl Operator {
             Operator::Add => 10,
             Operator::Sub => 10,
             Operator::Mul => 20,
+            Operator::Percent => 10,
         }
     }
 }

@@ -299,6 +299,7 @@ impl Parser {
             Token::Star => Some(Operator::Mul),
             Token::Greater => Some(Operator::Greater),
             Token::Smaller => Some(Operator::Smaller),
+            Token::Percent => Some(Operator::Percent),
             _ => None,
         }
     }
