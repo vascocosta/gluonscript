@@ -125,6 +125,20 @@ fn call_builtin(name: &str, args: &[Value]) -> Value {
             Value::String(s) => Value::Number(s.len() as i64),
             _ => panic!("len() unsupported type"),
         },
+        "append" => match &args[0] {
+            Value::List(v) => {
+                if args.len() != 2 {
+                    panic!("append expects 2 arguments")
+                }
+
+                let mut new_list = v.clone();
+
+                new_list.push(args[1].clone());
+
+                Value::List(new_list)
+            }
+            _ => panic!("append expects a list"),
+        },
         "string" => match &args[0] {
             Value::Number(n) => Value::String(n.to_string()),
             _ => panic!("string expects a number"),
