@@ -301,6 +301,7 @@ impl Parser {
             Token::Greater => Some(Operator::Greater),
             Token::Smaller => Some(Operator::Smaller),
             Token::Percent => Some(Operator::Percent),
+            Token::EqualEqual => Some(Operator::Equal),
             _ => None,
         }
     }

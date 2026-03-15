@@ -10,6 +10,7 @@ pub enum Token {
     Greater,
     Smaller,
     Equals,
+    EqualEqual,
     If,
     Else,
     While,
@@ -98,7 +99,13 @@ impl Lexer {
 
                 '=' => {
                     self.consume();
-                    tokens.push(Token::Equals);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::EqualEqual);
+                    } else {
+                        tokens.push(Token::Equals)
+                    }
                 }
 
                 '{' => {
