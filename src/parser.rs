@@ -311,6 +311,7 @@ impl Parser {
             Token::Plus => Some(Operator::Add),
             Token::Minus => Some(Operator::Sub),
             Token::Star => Some(Operator::Mul),
+            Token::Slash => Some(Operator::Div),
             Token::Greater => Some(Operator::Greater),
             Token::GreaterEqual => Some(Operator::GreaterEqual),
             Token::Smaller => Some(Operator::Smaller),

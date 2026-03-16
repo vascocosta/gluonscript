@@ -6,6 +6,7 @@ pub enum Token {
     Plus,
     Minus,
     Star,
+    Slash,
     Percent,
     Greater,
     GreaterEqual,
@@ -82,6 +83,11 @@ impl Lexer {
                 '*' => {
                     self.consume();
                     tokens.push(Token::Star);
+                }
+
+                '/' => {
+                    self.consume();
+                    tokens.push(Token::Slash);
                 }
 
                 '%' => {
