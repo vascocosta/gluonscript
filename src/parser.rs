@@ -226,6 +226,18 @@ impl Parser {
     }
 
     fn parse_primary(&mut self) -> Expr {
+        if matches!(self.peek(), Some(Token::Minus)) {
+            self.consume();
+
+            let expr = self.parse_primary();
+
+            return Expr::Binary {
+                left: Box::new(Expr::Number(0)),
+                op: Operator::Sub,
+                right: Box::new(expr),
+            };
+        }
+
         match self.consume() {
             Some(Token::Number(n)) => Expr::Number(n),
             Some(Token::String(s)) => Expr::String(s),
