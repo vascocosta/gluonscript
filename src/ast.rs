@@ -39,6 +39,12 @@ impl Expr {
                     (Value::Number(a), Value::Number(b), Operator::Mul) => Value::Number(a * b),
                     (Value::Number(a), Value::Number(b), Operator::Greater) => Value::Bool(a > b),
                     (Value::Number(a), Value::Number(b), Operator::Smaller) => Value::Bool(a < b),
+                    (Value::Number(a), Value::Number(b), Operator::GreaterEqual) => {
+                        Value::Bool(a >= b)
+                    }
+                    (Value::Number(a), Value::Number(b), Operator::SmallerEqual) => {
+                        Value::Bool(a <= b)
+                    }
                     (Value::Number(a), Value::Number(b), Operator::Percent) => Value::Number(a % b),
                     (Value::Number(a), Value::Number(b), Operator::Equal) => Value::Bool(a == b),
                     (Value::String(a), Value::String(b), Operator::Add) => {
@@ -121,7 +127,9 @@ pub enum Operator {
     Sub,
     Percent,
     Greater,
+    GreaterEqual,
     Smaller,
+    SmallerEqual,
     Equal,
 }
 
@@ -129,7 +137,9 @@ impl Operator {
     pub fn precedence(op: &Operator) -> u8 {
         match op {
             Operator::Greater => 5,
+            Operator::GreaterEqual => 5,
             Operator::Smaller => 5,
+            Operator::SmallerEqual => 5,
             Operator::Add => 10,
             Operator::Sub => 10,
             Operator::Mul => 20,

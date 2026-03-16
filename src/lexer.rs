@@ -8,7 +8,9 @@ pub enum Token {
     Star,
     Percent,
     Greater,
+    GreaterEqual,
     Smaller,
+    SmallerEqual,
     Equals,
     EqualEqual,
     If,
@@ -89,12 +91,24 @@ impl Lexer {
 
                 '>' => {
                     self.consume();
-                    tokens.push(Token::Greater);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::GreaterEqual);
+                    } else {
+                        tokens.push(Token::Greater);
+                    }
                 }
 
                 '<' => {
                     self.consume();
-                    tokens.push(Token::Smaller);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::SmallerEqual);
+                    } else {
+                        tokens.push(Token::Smaller);
+                    }
                 }
 
                 '=' => {
