@@ -1,5 +1,6 @@
-use crate::ast::{Expr, Operator, Stmt};
+use crate::ast::{Expr, Stmt};
 use crate::lexer::Token;
+use crate::operators::Operator;
 use crate::program::Program;
 
 pub struct Parser {

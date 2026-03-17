@@ -1,6 +1,7 @@
 mod ast;
 mod builtin;
 mod lexer;
+mod operators;
 mod parser;
 mod program;
 
