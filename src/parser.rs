@@ -36,13 +36,14 @@ impl Parser {
         match self.peek() {
             Some(Token::If) => self.parse_if(),
             Some(Token::While) => self.parse_while(),
-            Some(Token::Ident(_)) => {
-                if matches!(self.peek_next(), Some(Token::Equals)) {
-                    self.parse_assign()
-                } else {
-                    Stmt::Expr(self.parse_expr(0))
-                }
-            }
+            Some(Token::Ident(_)) => match self.peek_next() {
+                Some(Token::Equals) => self.parse_assign(),
+                Some(Token::PlusEquals) => self.parse_op_assign(Operator::Add),
+                Some(Token::MinusEquals) => self.parse_op_assign(Operator::Sub),
+                Some(Token::StarEquals) => self.parse_op_assign(Operator::Mul),
+                Some(Token::SlashEquals) => self.parse_op_assign(Operator::Div),
+                _ => Stmt::Expr(self.parse_expr(0)),
+            },
             Some(Token::Fn) => self.parse_function(),
             _ => Stmt::Expr(self.parse_expr(0)),
         }
@@ -59,6 +60,26 @@ impl Parser {
         let value = self.parse_expr(0);
 
         Stmt::Assign { name, value }
+    }
+
+    fn parse_op_assign(&mut self, op: Operator) -> Stmt {
+        let name = match self.consume() {
+            Some(Token::Ident(n)) => n,
+            _ => panic!("expected identifier"),
+        };
+
+        self.consume();
+
+        let value = self.parse_expr(0);
+
+        Stmt::Assign {
+            name: name.clone(),
+            value: Expr::Binary {
+                left: Box::new(Expr::Variable(name)),
+                op,
+                right: Box::new(value),
+            },
+        }
     }
 
     fn parse_if(&mut self) -> Stmt {

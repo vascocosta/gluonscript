@@ -5,9 +5,13 @@ pub enum Token {
     String(String),
     Ident(String),
     Plus,
+    PlusEquals,
     Minus,
+    MinusEquals,
     Star,
+    StarEquals,
     Slash,
+    SlashEquals,
     Percent,
     Greater,
     GreaterEqual,
@@ -73,22 +77,46 @@ impl Lexer {
 
                 '+' => {
                     self.consume();
-                    tokens.push(Token::Plus);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::PlusEquals);
+                    } else {
+                        tokens.push(Token::Plus);
+                    }
                 }
 
                 '-' => {
                     self.consume();
-                    tokens.push(Token::Minus);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::MinusEquals);
+                    } else {
+                        tokens.push(Token::Minus);
+                    }
                 }
 
                 '*' => {
                     self.consume();
-                    tokens.push(Token::Star);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::StarEquals);
+                    } else {
+                        tokens.push(Token::Star);
+                    }
                 }
 
                 '/' => {
                     self.consume();
-                    tokens.push(Token::Slash);
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::SlashEquals);
+                    } else {
+                        tokens.push(Token::Slash);
+                    }
                 }
 
                 '%' => {
