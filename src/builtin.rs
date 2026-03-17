@@ -27,13 +27,21 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
 
             Value::Bool(true)
         }
-        "number" => match &args[0] {
+        "int" => match &args[0] {
             Value::String(s) => Value::Int(
                 s.trim_ascii()
                     .parse()
-                    .expect("number expects a valid number string"),
+                    .expect("int expects a valid number string"),
             ),
-            _ => panic!("number expects a string"),
+            _ => panic!("int expects a string"),
+        },
+        "float" => match &args[0] {
+            Value::String(s) => Value::Float(
+                s.trim_ascii()
+                    .parse()
+                    .expect("float expects a valid number string"),
+            ),
+            _ => panic!("float expects a string"),
         },
         "len" => match &args[0] {
             Value::List(v) => Value::Int(v.len() as i64),
