@@ -17,7 +17,7 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
                     Value::Float(n) => print!("{}", n),
                     Value::Bool(b) => print!("{}", b),
                     Value::String(s) => print!("{}", s),
-                    Value::List(l) => println!("{:#?}", l),
+                    Value::List(l) => println!("{:?}", l),
                 }
             }
 
@@ -56,7 +56,10 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
         },
         "string" => match &args[0] {
             Value::Int(n) => Value::String(n.to_string()),
-            _ => panic!("string expects a number"),
+            Value::Float(n) => Value::String(n.to_string()),
+            Value::Bool(b) => Value::String(b.to_string()),
+            Value::List(l) => Value::String(format!("{:?}", l)),
+            _ => panic!("unable to convert type to string"),
         },
         _ => panic!("unknown function {}", name),
     }
