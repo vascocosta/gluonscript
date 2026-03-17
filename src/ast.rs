@@ -113,6 +113,10 @@ impl Expr {
                     (Value::String(a), Value::String(b), Operator::Add) => {
                         Value::String(format!("{}{}", a, b))
                     }
+
+                    (Value::Bool(a), Value::Bool(b), Operator::Or) => Value::Bool(a || b),
+                    (Value::Bool(a), Value::Bool(b), Operator::And) => Value::Bool(a && b),
+
                     _ => panic!("type error"),
                 }
             }
@@ -195,6 +199,8 @@ pub enum Operator {
     Smaller,
     SmallerEqual,
     Equal,
+    Or,
+    And,
 }
 
 impl Operator {
@@ -210,6 +216,8 @@ impl Operator {
             Operator::Div => 20,
             Operator::Percent => 10,
             Operator::Equal => 3,
+            Operator::Or => 2,
+            Operator::And => 2,
         }
     }
 }

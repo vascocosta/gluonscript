@@ -19,6 +19,8 @@ pub enum Token {
     SmallerEqual,
     Equals,
     EqualEqual,
+    Pipe,
+    Ampersand,
     If,
     Else,
     While,
@@ -154,6 +156,28 @@ impl Lexer {
                         tokens.push(Token::EqualEqual);
                     } else {
                         tokens.push(Token::Equals)
+                    }
+                }
+
+                '|' => {
+                    self.consume();
+
+                    if self.peek() == Some('|') {
+                        self.consume();
+                        tokens.push(Token::Pipe);
+                    } else {
+                        panic!("Unexpected character: {}", c);
+                    }
+                }
+
+                '&' => {
+                    self.consume();
+
+                    if self.peek() == Some('&') {
+                        self.consume();
+                        tokens.push(Token::Ampersand);
+                    } else {
+                        panic!("Unexpected character: {}", c);
                     }
                 }
 
