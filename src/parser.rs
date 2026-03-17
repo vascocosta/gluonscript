@@ -37,6 +37,7 @@ impl Parser {
         match self.peek() {
             Some(Token::If) => self.parse_if(),
             Some(Token::While) => self.parse_while(),
+            Some(Token::Return) => self.parse_return(),
             Some(Token::Ident(_)) => match self.peek_next() {
                 Some(Token::Equals) => self.parse_assign(),
                 Some(Token::PlusEquals) => self.parse_op_assign(Operator::Add),
@@ -195,6 +196,14 @@ impl Parser {
         self.consume();
 
         Stmt::Function { name, params, body }
+    }
+
+    fn parse_return(&mut self) -> Stmt {
+        self.consume();
+
+        let expr = self.parse_expr(0);
+
+        Stmt::Return(expr)
     }
 
     fn parse_expr(&mut self, min_prec: u8) -> Expr {

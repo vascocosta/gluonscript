@@ -131,11 +131,13 @@ impl Expr {
                         local_env.set(param.clone(), value);
                     }
 
-                    let mut result = Value::Bool(false);
+                    let result = Value::Bool(false);
 
                     for stmt in &func.body {
-                        if let Some(v) = Program::exec_stmt(stmt, &mut local_env) {
-                            result = v;
+                        match Program::exec_stmt(stmt, &mut local_env) {
+                            ExecResult::Continue => {}
+                            ExecResult::Value(v) => return v,
+                            ExecResult::Return(v) => return v,
                         }
                     }
 
@@ -186,6 +188,13 @@ pub enum Stmt {
         params: Vec<String>,
         body: Vec<Stmt>,
     },
+    Return(Expr),
+}
+
+pub enum ExecResult {
+    Continue,
+    Return(Value),
+    Value(Value),
 }
 
 #[derive(Debug, Clone)]

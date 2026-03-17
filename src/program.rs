@@ -1,18 +1,18 @@
-use crate::ast::{Env, Expr, Function, Stmt, Value};
+use crate::ast::{Env, ExecResult, Expr, Function, Stmt, Value};
 
 pub struct Program {
     pub statements: Vec<Stmt>,
 }
 
 impl Program {
-    pub fn exec_stmt(stmt: &Stmt, env: &mut Env) -> Option<Value> {
+    pub fn exec_stmt(stmt: &Stmt, env: &mut Env) -> ExecResult {
         match stmt {
             Stmt::Assign { name, value } => {
                 let v = Expr::eval_expr(value, env);
                 env.vars.insert(name.clone(), v);
-                None
+                ExecResult::Continue
             }
-            Stmt::Expr(expr) => Some(Expr::eval_expr(expr, env)),
+            Stmt::Expr(expr) => ExecResult::Value(Expr::eval_expr(expr, env)),
             Stmt::If {
                 condition,
                 then_branch,
@@ -30,7 +30,7 @@ impl Program {
                     }
                 }
 
-                None
+                ExecResult::Continue
             }
             Stmt::While { condition, body } => {
                 loop {
@@ -49,7 +49,7 @@ impl Program {
                     }
                 }
 
-                None
+                ExecResult::Continue
             }
             Stmt::Function { name, params, body } => {
                 env.functions.insert(
@@ -59,18 +59,22 @@ impl Program {
                         body: body.clone(),
                     },
                 );
-                None
+                ExecResult::Continue
+            }
+            Stmt::Return(expr) => {
+                let value = Expr::eval_expr(expr, env);
+                ExecResult::Return(value)
             }
         }
     }
 
-    pub fn run(&self) -> Option<Value> {
+    pub fn run(&self) -> ExecResult {
         let mut env = Env::new();
-        let mut last = None;
+        let mut last = ExecResult::Continue;
 
         for stmt in &self.statements {
-            if let Some(v) = Self::exec_stmt(stmt, &mut env) {
-                last = Some(v);
+            if let ExecResult::Value(v) = Self::exec_stmt(stmt, &mut env) {
+                last = ExecResult::Value(v);
             }
         }
 

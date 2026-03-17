@@ -32,6 +32,7 @@ pub enum Token {
     LBracket,
     RBracket,
     Comma,
+    Return,
 }
 
 pub struct Lexer {
@@ -287,6 +288,7 @@ impl Lexer {
             "else" => Token::Else,
             "while" => Token::While,
             "fn" => Token::Fn,
+            "return" => Token::Return,
             _ => Token::Ident(ident),
         }
     }
