@@ -4,7 +4,8 @@ use crate::{builtin, program::Program};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
-    Number(i64),
+    Int(i64),
+    Float(f64),
     String(String),
     Variable(String),
     Binary {
@@ -26,7 +27,8 @@ pub enum Expr {
 impl Expr {
     pub fn eval_expr(expr: &Expr, env: &Env) -> Value {
         match expr {
-            Expr::Number(n) => Value::Number(*n),
+            Expr::Int(n) => Value::Int(*n),
+            Expr::Float(n) => Value::Float(*n),
             Expr::String(s) => Value::String(s.to_owned()),
             Expr::Variable(name) => env.get(name),
             Expr::Binary { left, op, right } => {
@@ -34,20 +36,80 @@ impl Expr {
                 let r = Self::eval_expr(right, env);
 
                 match (l, r, op) {
-                    (Value::Number(a), Value::Number(b), Operator::Add) => Value::Number(a + b),
-                    (Value::Number(a), Value::Number(b), Operator::Sub) => Value::Number(a - b),
-                    (Value::Number(a), Value::Number(b), Operator::Mul) => Value::Number(a * b),
-                    (Value::Number(a), Value::Number(b), Operator::Div) => Value::Number(a / b),
-                    (Value::Number(a), Value::Number(b), Operator::Greater) => Value::Bool(a > b),
-                    (Value::Number(a), Value::Number(b), Operator::Smaller) => Value::Bool(a < b),
-                    (Value::Number(a), Value::Number(b), Operator::GreaterEqual) => {
+                    (Value::Int(a), Value::Int(b), Operator::Add) => Value::Int(a + b),
+                    (Value::Float(a), Value::Float(b), Operator::Add) => Value::Float(a + b),
+                    (Value::Int(a), Value::Float(b), Operator::Add) => Value::Float(a as f64 + b),
+                    (Value::Float(a), Value::Int(b), Operator::Add) => Value::Float(a + b as f64),
+
+                    (Value::Int(a), Value::Int(b), Operator::Sub) => Value::Int(a - b),
+                    (Value::Float(a), Value::Float(b), Operator::Sub) => Value::Float(a - b),
+                    (Value::Int(a), Value::Float(b), Operator::Sub) => Value::Float(a as f64 - b),
+                    (Value::Float(a), Value::Int(b), Operator::Sub) => Value::Float(a - b as f64),
+
+                    (Value::Int(a), Value::Int(b), Operator::Mul) => Value::Int(a * b),
+                    (Value::Float(a), Value::Float(b), Operator::Mul) => Value::Float(a * b),
+                    (Value::Int(a), Value::Float(b), Operator::Mul) => Value::Float(a as f64 * b),
+                    (Value::Float(a), Value::Int(b), Operator::Mul) => Value::Float(a * b as f64),
+
+                    (Value::Int(a), Value::Int(b), Operator::Div) => Value::Int(a / b),
+                    (Value::Float(a), Value::Float(b), Operator::Div) => Value::Float(a / b),
+                    (Value::Int(a), Value::Float(b), Operator::Div) => Value::Float(a as f64 / b),
+                    (Value::Float(a), Value::Int(b), Operator::Div) => Value::Float(a / b as f64),
+
+                    (Value::Int(a), Value::Int(b), Operator::Greater) => Value::Bool(a > b),
+                    (Value::Float(a), Value::Float(b), Operator::Greater) => Value::Bool(a > b),
+                    (Value::Int(a), Value::Float(b), Operator::Greater) => {
+                        Value::Bool(a as f64 > b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::Greater) => {
+                        Value::Bool(a > b as f64)
+                    }
+
+                    (Value::Int(a), Value::Int(b), Operator::Smaller) => Value::Bool(a < b),
+                    (Value::Float(a), Value::Float(b), Operator::Smaller) => Value::Bool(a < b),
+                    (Value::Int(a), Value::Float(b), Operator::Smaller) => {
+                        Value::Bool((a as f64) < b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::Smaller) => {
+                        Value::Bool(a < b as f64)
+                    }
+
+                    (Value::Int(a), Value::Int(b), Operator::GreaterEqual) => Value::Bool(a >= b),
+                    (Value::Float(a), Value::Float(b), Operator::GreaterEqual) => {
                         Value::Bool(a >= b)
                     }
-                    (Value::Number(a), Value::Number(b), Operator::SmallerEqual) => {
+                    (Value::Int(a), Value::Float(b), Operator::GreaterEqual) => {
+                        Value::Bool(a as f64 >= b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::GreaterEqual) => {
+                        Value::Bool(a >= b as f64)
+                    }
+
+                    (Value::Int(a), Value::Int(b), Operator::SmallerEqual) => Value::Bool(a <= b),
+                    (Value::Float(a), Value::Float(b), Operator::SmallerEqual) => {
                         Value::Bool(a <= b)
                     }
-                    (Value::Number(a), Value::Number(b), Operator::Percent) => Value::Number(a % b),
-                    (Value::Number(a), Value::Number(b), Operator::Equal) => Value::Bool(a == b),
+                    (Value::Int(a), Value::Float(b), Operator::SmallerEqual) => {
+                        Value::Bool(a as f64 <= b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::SmallerEqual) => {
+                        Value::Bool(a <= b as f64)
+                    }
+
+                    (Value::Int(a), Value::Int(b), Operator::Percent) => Value::Int(a % b),
+                    (Value::Float(a), Value::Float(b), Operator::Percent) => Value::Float(a % b),
+                    (Value::Int(a), Value::Float(b), Operator::Percent) => {
+                        Value::Float(a as f64 % b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::Percent) => {
+                        Value::Float(a % b as f64)
+                    }
+
+                    (Value::Int(a), Value::Int(b), Operator::Equal) => Value::Bool(a == b),
+                    (Value::Float(a), Value::Float(b), Operator::Equal) => Value::Bool(a == b),
+                    (Value::Int(a), Value::Float(b), Operator::Equal) => Value::Bool(a as f64 == b),
+                    (Value::Float(a), Value::Int(b), Operator::Equal) => Value::Bool(a == b as f64),
+
                     (Value::String(a), Value::String(b), Operator::Add) => {
                         Value::String(format!("{}{}", a, b))
                     }
@@ -87,7 +149,7 @@ impl Expr {
                 let idx = Self::eval_expr(index, env);
 
                 match (list, idx) {
-                    (Value::List(v), Value::Number(i)) => {
+                    (Value::List(v), Value::Int(i)) => {
                         v.get(i as usize).cloned().expect("index out of bounds")
                     }
 
@@ -154,7 +216,8 @@ impl Operator {
 
 #[derive(Debug, Clone)]
 pub enum Value {
-    Number(i64),
+    Int(i64),
+    Float(f64),
     String(String),
     Bool(bool),
     List(Vec<Value>),

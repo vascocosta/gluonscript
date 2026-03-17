@@ -232,14 +232,15 @@ impl Parser {
             let expr = self.parse_primary();
 
             return Expr::Binary {
-                left: Box::new(Expr::Number(0)),
+                left: Box::new(Expr::Int(0)),
                 op: Operator::Sub,
                 right: Box::new(expr),
             };
         }
 
         match self.consume() {
-            Some(Token::Number(n)) => Expr::Number(n),
+            Some(Token::Int(n)) => Expr::Int(n),
+            Some(Token::Float(n)) => Expr::Float(n),
             Some(Token::String(s)) => Expr::String(s),
             Some(Token::Ident(name)) => {
                 // check if this is a function call

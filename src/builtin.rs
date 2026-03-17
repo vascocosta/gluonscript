@@ -13,7 +13,8 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
         "print" | "println" => {
             for a in args {
                 match a {
-                    Value::Number(n) => print!("{}", n),
+                    Value::Int(n) => print!("{}", n),
+                    Value::Float(n) => print!("{}", n),
                     Value::Bool(b) => print!("{}", b),
                     Value::String(s) => print!("{}", s),
                     Value::List(l) => println!("{:#?}", l),
@@ -27,7 +28,7 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
             Value::Bool(true)
         }
         "number" => match &args[0] {
-            Value::String(s) => Value::Number(
+            Value::String(s) => Value::Int(
                 s.trim_ascii()
                     .parse()
                     .expect("number expects a valid number string"),
@@ -35,8 +36,8 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
             _ => panic!("number expects a string"),
         },
         "len" => match &args[0] {
-            Value::List(v) => Value::Number(v.len() as i64),
-            Value::String(s) => Value::Number(s.len() as i64),
+            Value::List(v) => Value::Int(v.len() as i64),
+            Value::String(s) => Value::Int(s.len() as i64),
             _ => panic!("len() unsupported type"),
         },
         "append" => match &args[0] {
@@ -54,7 +55,7 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
             _ => panic!("append expects a list"),
         },
         "string" => match &args[0] {
-            Value::Number(n) => Value::String(n.to_string()),
+            Value::Int(n) => Value::String(n.to_string()),
             _ => panic!("string expects a number"),
         },
         _ => panic!("unknown function {}", name),

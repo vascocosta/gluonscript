@@ -1,6 +1,7 @@
 #[derive(Clone, Debug)]
 pub enum Token {
-    Number(i64),
+    Int(i64),
+    Float(f64),
     String(String),
     Ident(String),
     Plus,
@@ -179,7 +180,7 @@ impl Lexer {
         let start = self.pos;
 
         while let Some(c) = self.peek() {
-            if c.is_ascii_digit() {
+            if c.is_ascii_digit() || c == '.' {
                 self.consume();
             } else {
                 break;
@@ -188,7 +189,11 @@ impl Lexer {
 
         let num: String = self.chars[start..self.pos].iter().collect();
 
-        Token::Number(num.parse().expect("expected a number"))
+        if num.contains(".") {
+            Token::Float(num.parse().expect("expected a number"))
+        } else {
+            Token::Int(num.parse().expect("expected a number"))
+        }
     }
 
     fn lex_string(&mut self) -> Token {
