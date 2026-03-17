@@ -22,11 +22,19 @@ impl Program {
 
                 if let Value::Bool(true) = cond {
                     for stmt in then_branch {
-                        Self::exec_stmt(stmt, env);
+                        let res = Self::exec_stmt(stmt, env);
+
+                        if let ExecResult::Return(_) = res {
+                            return res;
+                        }
                     }
                 } else {
                     for stmt in else_branch {
-                        Self::exec_stmt(stmt, env);
+                        let res = Self::exec_stmt(stmt, env);
+
+                        if let ExecResult::Return(_) = res {
+                            return res;
+                        }
                     }
                 }
 
@@ -39,7 +47,11 @@ impl Program {
                     match cond {
                         Value::Bool(true) => {
                             for stmt in body {
-                                Self::exec_stmt(stmt, env);
+                                let res = Self::exec_stmt(stmt, env);
+
+                                if let ExecResult::Return(_) = res {
+                                    return res;
+                                }
                             }
                         }
 

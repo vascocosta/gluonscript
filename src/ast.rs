@@ -136,8 +136,8 @@ impl Expr {
                     for stmt in &func.body {
                         match Program::exec_stmt(stmt, &mut local_env) {
                             ExecResult::Continue => {}
-                            ExecResult::Value(v) => return v,
                             ExecResult::Return(v) => return v,
+                            ExecResult::Value(v) => return v,
                         }
                     }
 
