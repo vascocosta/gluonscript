@@ -23,6 +23,11 @@ pub enum Expr {
         target: Box<Expr>,
         index: Box<Expr>,
     },
+    RecordLiteral(Vec<(String, Expr)>),
+    Propery {
+        target: Box<Expr>,
+        name: String,
+    },
 }
 
 impl Expr {
@@ -163,6 +168,26 @@ impl Expr {
                     _ => panic!("invalid indexing"),
                 }
             }
+            Expr::RecordLiteral(fields) => {
+                let mut map = HashMap::new();
+
+                for (k, v) in fields {
+                    map.insert(k.clone(), Self::eval_expr(v, env));
+                }
+
+                Value::Record(map)
+            }
+            Expr::Propery { target, name } => {
+                let record = Self::eval_expr(target, env);
+
+                match record {
+                    Value::Record(map) => map
+                        .get(name)
+                        .cloned()
+                        .unwrap_or_else(|| panic!("unknown property {}", name)),
+                    _ => panic!("not a record"),
+                }
+            }
         }
     }
 }
@@ -204,6 +229,7 @@ pub enum Value {
     String(String),
     Bool(bool),
     List(Vec<Value>),
+    Record(HashMap<String, Value>),
 }
 
 #[derive(Clone)]

@@ -17,7 +17,8 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
                     Value::Float(n) => print!("{}", n),
                     Value::Bool(b) => print!("{}", b),
                     Value::String(s) => print!("{}", s),
-                    Value::List(l) => println!("{:?}", l),
+                    Value::List(l) => print!("{:?}", l),
+                    Value::Record(o) => print!("{:?}", o),
                 }
             }
 

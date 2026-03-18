@@ -32,6 +32,8 @@ pub enum Token {
     LBracket,
     RBracket,
     Comma,
+    Colon,
+    Dot,
     Return,
 }
 
@@ -220,6 +222,16 @@ impl Lexer {
                 ',' => {
                     self.consume();
                     tokens.push(Token::Comma);
+                }
+
+                ':' => {
+                    self.consume();
+                    tokens.push(Token::Colon);
+                }
+
+                '.' => {
+                    self.consume();
+                    tokens.push(Token::Dot);
                 }
 
                 _ => panic!("Unexpected character: {}", c),

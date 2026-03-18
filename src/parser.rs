@@ -227,6 +227,20 @@ impl Parser {
                     };
                 }
 
+                Some(Token::Dot) => {
+                    self.consume();
+
+                    let name = match self.consume() {
+                        Some(Token::Ident(n)) => n,
+                        _ => panic!("expected property name"),
+                    };
+
+                    left = Expr::Propery {
+                        target: Box::new(left),
+                        name,
+                    };
+                }
+
                 _ => break,
             }
         }
@@ -332,6 +346,40 @@ impl Parser {
                 }
 
                 Expr::ListLiteral(elements)
+            }
+            Some(Token::LBrace) => {
+                let mut fields = Vec::new();
+
+                if !matches!(self.peek(), Some(Token::RBrace)) {
+                    loop {
+                        let key = match self.consume() {
+                            Some(Token::Ident(name)) => name,
+                            _ => panic!("expected key"),
+                        };
+
+                        match self.consume() {
+                            Some(Token::Colon) => {}
+                            _ => panic!("expected ':'"),
+                        }
+
+                        let value = self.parse_expr(0);
+
+                        fields.push((key, value));
+
+                        if matches!(self.peek(), Some(Token::Comma)) {
+                            self.consume();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                match self.consume() {
+                    Some(Token::RBrace) => {}
+                    _ => panic!("expected }}"),
+                }
+
+                Expr::RecordLiteral(fields)
             }
 
             other => panic!("unexpected token: {:?}", other),
