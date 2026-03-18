@@ -31,7 +31,7 @@ impl Expr {
             Expr::Int(n) => Value::Int(*n),
             Expr::Float(n) => Value::Float(*n),
             Expr::String(s) => Value::String(s.to_owned()),
-            Expr::Variable(name) => env.get(name),
+            Expr::Variable(name) => env.get_vars(name),
             Expr::Binary { left, op, right } => {
                 let l = Self::eval_expr(left, env);
                 let r = Self::eval_expr(right, env);
@@ -124,7 +124,7 @@ impl Expr {
             Expr::Call { name, args } => {
                 let values: Vec<Value> = args.iter().map(|a| Self::eval_expr(a, env)).collect();
 
-                if let Some(func) = env.functions.get(name) {
+                if let Some(func) = env.get_functions(name) {
                     let mut local_env = env.child();
 
                     for (param, value) in func.params.iter().zip(values) {
@@ -231,23 +231,33 @@ impl Env {
     fn child(&self) -> Self {
         Self {
             vars: HashMap::new(),
-            functions: self.functions.clone(),
+            functions: HashMap::new(),
             parent: Some(Box::new(self.clone())),
         }
     }
 
-    fn get(&self, name: &str) -> Value {
+    fn get_vars(&self, name: &str) -> Value {
         if let Some(v) = self.vars.get(name) {
             return v.clone();
         }
 
         if let Some(parent) = &self.parent {
-            if let Some(v) = parent.vars.get(name) {
-                return v.clone();
-            }
+            return parent.get_vars(name);
         }
 
         panic!("undefined variable: {}", name)
+    }
+
+    fn get_functions(&self, name: &str) -> Option<Function> {
+        if let Some(f) = self.functions.get(name) {
+            return Some(f.clone());
+        }
+
+        if let Some(parent) = &self.parent {
+            return parent.get_functions(name);
+        }
+
+        None
     }
 
     fn set(&mut self, name: String, value: Value) {
