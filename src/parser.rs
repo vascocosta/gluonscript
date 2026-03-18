@@ -36,6 +36,7 @@ impl Parser {
     fn parse_stmt(&mut self) -> Stmt {
         match self.peek() {
             Some(Token::If) => self.parse_if(),
+            Some(Token::For) => self.parse_for(),
             Some(Token::While) => self.parse_while(),
             Some(Token::Return) => self.parse_return(),
             Some(Token::Ident(_)) => match self.peek_next() {
@@ -145,6 +146,41 @@ impl Parser {
         self.consume(); // }
 
         Stmt::While { condition, body }
+    }
+
+    fn parse_for(&mut self) -> Stmt {
+        self.consume();
+
+        let var = match self.consume() {
+            Some(Token::Ident(n)) => n,
+            _ => panic!("expected variable name"),
+        };
+
+        match self.consume() {
+            Some(Token::In) => {}
+            _ => panic!("expected 'in'"),
+        }
+
+        let iterable = self.parse_expr(0);
+
+        match self.consume() {
+            Some(Token::LBrace) => {}
+            _ => panic!("expected {{"),
+        }
+
+        let mut body = Vec::new();
+
+        while !matches!(self.peek(), Some(Token::RBrace)) {
+            body.push(self.parse_stmt());
+        }
+
+        self.consume();
+
+        Stmt::For {
+            var,
+            iterable,
+            body,
+        }
     }
 
     fn parse_function(&mut self) -> Stmt {

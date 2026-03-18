@@ -22,7 +22,9 @@ pub enum Token {
     Pipe,
     Ampersand,
     If,
+    In,
     Else,
+    For,
     While,
     Fn,
     LBrace,
@@ -297,7 +299,9 @@ impl Lexer {
 
         match ident.as_str() {
             "if" => Token::If,
+            "in" => Token::In,
             "else" => Token::Else,
+            "for" => Token::For,
             "while" => Token::While,
             "fn" => Token::Fn,
             "return" => Token::Return,

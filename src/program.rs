@@ -40,6 +40,33 @@ impl Program {
 
                 ExecResult::Continue
             }
+            Stmt::For {
+                var,
+                iterable,
+                body,
+            } => {
+                let value = Expr::eval_expr(iterable, env);
+
+                match value {
+                    Value::List(items) => {
+                        for item in items {
+                            env.set(var.clone(), item);
+
+                            for stmt in body {
+                                match Self::exec_stmt(stmt, env) {
+                                    ExecResult::Continue => {}
+                                    ExecResult::Return(v) => return ExecResult::Return(v),
+                                    ExecResult::Value(_) => {}
+                                }
+                            }
+                        }
+                    }
+
+                    _ => panic!("for loop expects a list"),
+                }
+
+                ExecResult::Continue
+            }
             Stmt::While { condition, body } => {
                 loop {
                     let cond = Expr::eval_expr(condition, env);

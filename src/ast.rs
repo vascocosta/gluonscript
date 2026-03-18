@@ -204,6 +204,11 @@ pub enum Stmt {
         then_branch: Vec<Stmt>,
         else_branch: Vec<Stmt>,
     },
+    For {
+        var: String,
+        iterable: Expr,
+        body: Vec<Stmt>,
+    },
     While {
         condition: Expr,
         body: Vec<Stmt>,
@@ -286,7 +291,7 @@ impl Env {
         None
     }
 
-    fn set(&mut self, name: String, value: Value) {
+    pub fn set(&mut self, name: String, value: Value) {
         self.vars.insert(name, value);
     }
 }
