@@ -1,4 +1,4 @@
-use std::io;
+use std::{collections::HashMap, io};
 
 use crate::ast::Value;
 
@@ -82,6 +82,29 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
                 json_to_value(parsed_json)
             }
             _ => panic!("json expects a string argument"),
+        },
+        "get" => match &args[0] {
+            Value::String(s) => {
+                let response = reqwest::blocking::get(s);
+
+                match response {
+                    Ok(reponse) => match reponse.text() {
+                        Ok(text) => Value::Record(HashMap::from([
+                            ("error".to_string(), Value::Bool(false)),
+                            ("value".to_string(), Value::String(text)),
+                        ])),
+                        Err(e) => Value::Record(HashMap::from([
+                            ("error".to_string(), Value::Bool(true)),
+                            ("value".to_string(), Value::String(e.to_string())),
+                        ])),
+                    },
+                    Err(e) => Value::Record(HashMap::from([
+                        ("error".to_string(), Value::Bool(true)),
+                        ("value".to_string(), Value::String(e.to_string())),
+                    ])),
+                }
+            }
+            _ => panic!("get expects a string argument"),
         },
         _ => panic!("unknown function {}", name),
     }
