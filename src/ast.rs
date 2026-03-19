@@ -136,13 +136,13 @@ impl Expr {
                         local_env.set(param.clone(), value);
                     }
 
-                    let result = Value::Bool(false);
+                    let mut result = Value::Bool(false);
 
                     for stmt in &func.body {
                         match Program::exec_stmt(stmt, &mut local_env) {
                             ExecResult::Continue => {}
                             ExecResult::Return(v) => return v,
-                            ExecResult::Value(v) => return v,
+                            ExecResult::Value(v) => result = v,
                         }
                     }
 
