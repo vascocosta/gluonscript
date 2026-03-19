@@ -249,6 +249,18 @@ impl Lexer {
                     tokens.push(Token::Dot);
                 }
 
+                '#' => {
+                    self.consume();
+
+                    while let Some(c) = self.peek() {
+                        if c == '\n' {
+                            break;
+                        }
+
+                        self.consume();
+                    }
+                }
+
                 _ => panic!("Unexpected character: {}", c),
             }
         }
