@@ -71,6 +71,7 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
             Value::Float(n) => Value::String(n.to_string()),
             Value::Bool(b) => Value::String(b.to_string()),
             Value::List(l) => Value::String(format!("{:?}", l)),
+            Value::Record(r) => Value::String(format!("{:?}", r)),
             _ => panic!("unable to convert type to string"),
         },
         "json" => match &args[0] {
