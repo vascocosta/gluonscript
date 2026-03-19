@@ -75,12 +75,16 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
             _ => panic!("unable to convert type to string"),
         },
         "json" => match &args[0] {
-            Value::String(s) => {
-                let parsed_json: serde_json::Value =
-                    serde_json::from_str(s).expect("invalid json data");
-
-                json_to_value(parsed_json)
-            }
+            Value::String(s) => match serde_json::from_str(s) {
+                Ok(parsed_json) => Value::Record(HashMap::from([
+                    ("error".to_string(), Value::Bool(false)),
+                    ("value".to_string(), json_to_value(parsed_json)),
+                ])),
+                Err(e) => Value::Record(HashMap::from([
+                    ("error".to_string(), Value::Bool(true)),
+                    ("value".to_string(), Value::String(e.to_string())),
+                ])),
+            },
             _ => panic!("json expects a string argument"),
         },
         "get" => match &args[0] {
