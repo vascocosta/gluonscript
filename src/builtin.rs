@@ -90,12 +90,12 @@ fn json_to_value(v: serde_json::Value) -> Value {
     match v {
         serde_json::Value::Bool(b) => Value::Bool(b),
         serde_json::Value::Number(n) => {
-            if n.is_f64() {
-                Value::Float(n.as_f64().expect("expected f64 format"))
-            } else if n.is_i64() {
+            if n.is_i64() {
                 Value::Int(n.as_i64().expect("expected i64 format"))
             } else if n.is_u64() {
                 Value::Int(n.as_i64().expect("expected u64 format"))
+            } else if n.is_f64() {
+                Value::Float(n.as_f64().expect("expected f64 format"))
             } else {
                 panic!("unexpected number format")
             }
