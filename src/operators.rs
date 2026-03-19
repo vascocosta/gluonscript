@@ -9,7 +9,7 @@ pub enum Operator {
     GreaterEqual,
     Smaller,
     SmallerEqual,
-    Equal,
+    EqualEqual,
     Or,
     And,
 }
@@ -20,7 +20,7 @@ impl Operator {
             Operator::Or => 1,
             Operator::And => 2,
 
-            Operator::Equal => 3,
+            Operator::EqualEqual => 3,
 
             Operator::Greater => 4,
             Operator::GreaterEqual => 4,

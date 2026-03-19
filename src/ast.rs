@@ -111,10 +111,14 @@ impl Expr {
                         Value::Float(a % b as f64)
                     }
 
-                    (Value::Int(a), Value::Int(b), Operator::Equal) => Value::Bool(a == b),
-                    (Value::Float(a), Value::Float(b), Operator::Equal) => Value::Bool(a == b),
-                    (Value::Int(a), Value::Float(b), Operator::Equal) => Value::Bool(a as f64 == b),
-                    (Value::Float(a), Value::Int(b), Operator::Equal) => Value::Bool(a == b as f64),
+                    (Value::Int(a), Value::Int(b), Operator::EqualEqual) => Value::Bool(a == b),
+                    (Value::Float(a), Value::Float(b), Operator::EqualEqual) => Value::Bool(a == b),
+                    (Value::Int(a), Value::Float(b), Operator::EqualEqual) => {
+                        Value::Bool(a as f64 == b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::EqualEqual) => {
+                        Value::Bool(a == b as f64)
+                    }
 
                     (Value::String(a), Value::String(b), Operator::Add) => {
                         Value::String(format!("{}{}", a, b))

@@ -433,7 +433,7 @@ impl Parser {
             Token::Smaller => Some(Operator::Smaller),
             Token::SmallerEqual => Some(Operator::SmallerEqual),
             Token::Percent => Some(Operator::Percent),
-            Token::EqualEqual => Some(Operator::Equal),
+            Token::EqualEqual => Some(Operator::EqualEqual),
             Token::Pipe => Some(Operator::Or),
             Token::Ampersand => Some(Operator::And),
             _ => None,
