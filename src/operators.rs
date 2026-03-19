@@ -17,18 +17,22 @@ pub enum Operator {
 impl Operator {
     pub fn precedence(op: &Operator) -> u8 {
         match op {
-            Operator::Greater => 5,
-            Operator::GreaterEqual => 5,
-            Operator::Smaller => 5,
-            Operator::SmallerEqual => 5,
-            Operator::Add => 10,
-            Operator::Sub => 10,
-            Operator::Mul => 20,
-            Operator::Div => 20,
-            Operator::Percent => 10,
-            Operator::Equal => 3,
-            Operator::Or => 2,
+            Operator::Or => 1,
             Operator::And => 2,
+
+            Operator::Equal => 3,
+
+            Operator::Greater => 4,
+            Operator::GreaterEqual => 4,
+            Operator::Smaller => 4,
+            Operator::SmallerEqual => 4,
+
+            Operator::Add => 5,
+            Operator::Sub => 5,
+
+            Operator::Mul => 6,
+            Operator::Div => 6,
+            Operator::Percent => 6,
         }
     }
 }
