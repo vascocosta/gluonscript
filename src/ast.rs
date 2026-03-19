@@ -120,6 +120,15 @@ impl Expr {
                         Value::Bool(a == b as f64)
                     }
 
+                    (Value::Int(a), Value::Int(b), Operator::NotEqual) => Value::Bool(a != b),
+                    (Value::Float(a), Value::Float(b), Operator::NotEqual) => Value::Bool(a != b),
+                    (Value::Int(a), Value::Float(b), Operator::NotEqual) => {
+                        Value::Bool(a as f64 != b)
+                    }
+                    (Value::Float(a), Value::Int(b), Operator::NotEqual) => {
+                        Value::Bool(a != b as f64)
+                    }
+
                     (Value::String(a), Value::String(b), Operator::Add) => {
                         Value::String(format!("{}{}", a, b))
                     }

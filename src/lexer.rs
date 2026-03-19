@@ -19,6 +19,8 @@ pub enum Token {
     SmallerEqual,
     Equals,
     EqualEqual,
+    Not,
+    NotEqual,
     Pipe,
     Ampersand,
     If,
@@ -161,6 +163,17 @@ impl Lexer {
                         tokens.push(Token::EqualEqual);
                     } else {
                         tokens.push(Token::Equals)
+                    }
+                }
+
+                '!' => {
+                    self.consume();
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::NotEqual);
+                    } else {
+                        tokens.push(Token::Not);
                     }
                 }
 
