@@ -21,6 +21,7 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
                     Value::String(s) => print!("{}", s),
                     Value::List(l) => print!("{:?}", l),
                     Value::Record(o) => print!("{:?}", o),
+                    Value::Null => print!("Null"),
                 }
             }
 
@@ -72,6 +73,40 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
             Value::List(l) => Value::String(format!("{:?}", l)),
             _ => panic!("unable to convert type to string"),
         },
+        "json" => match &args[0] {
+            Value::String(s) => {
+                let parsed_json: serde_json::Value =
+                    serde_json::from_str(s).expect("invalid json data");
+
+                json_to_value(parsed_json)
+            }
+            _ => panic!("json expects a string argument"),
+        },
         _ => panic!("unknown function {}", name),
+    }
+}
+
+fn json_to_value(v: serde_json::Value) -> Value {
+    match v {
+        serde_json::Value::Bool(b) => Value::Bool(b),
+        serde_json::Value::Number(n) => {
+            if n.is_f64() {
+                Value::Float(n.as_f64().expect("expected f64 format"))
+            } else if n.is_i64() {
+                Value::Int(n.as_i64().expect("expected i64 format"))
+            } else if n.is_u64() {
+                Value::Int(n.as_i64().expect("expected u64 format"))
+            } else {
+                panic!("unexpected number format")
+            }
+        }
+        serde_json::Value::String(s) => Value::String(s),
+        serde_json::Value::Null => Value::Null,
+        serde_json::Value::Array(arr) => Value::List(arr.into_iter().map(json_to_value).collect()),
+        serde_json::Value::Object(map) => Value::Record(
+            map.into_iter()
+                .map(|(k, v)| (k, json_to_value(v)))
+                .collect(),
+        ),
     }
 }

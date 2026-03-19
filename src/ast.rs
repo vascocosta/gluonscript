@@ -246,6 +246,7 @@ pub enum ExecResult {
 
 #[derive(Debug, Clone)]
 pub enum Value {
+    Null,
     Int(i64),
     Float(f64),
     String(String),
