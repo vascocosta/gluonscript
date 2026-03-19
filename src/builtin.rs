@@ -6,9 +6,11 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
     match name {
         "input" => {
             let mut buf: String = String::new();
-            io::stdin().read_line(&mut buf).unwrap();
+            io::stdin()
+                .read_line(&mut buf)
+                .expect("input expects stdin to work");
 
-            Value::String(buf)
+            Value::String(buf.trim_end_matches(['\n', '\r']).to_string())
         }
         "print" | "println" => {
             for a in args {
