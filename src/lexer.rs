@@ -40,6 +40,7 @@ pub enum Token {
     Dot,
     Return,
     Break,
+    Continue,
 }
 
 pub struct Lexer {
@@ -332,6 +333,7 @@ impl Lexer {
             "fn" => Token::Fn,
             "return" => Token::Return,
             "break" => Token::Break,
+            "continue" => Token::Continue,
             _ => Token::Ident(ident),
         }
     }

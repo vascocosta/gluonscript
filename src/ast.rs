@@ -159,6 +159,7 @@ impl Expr {
                         match Program::exec_stmt(stmt, &mut local_env) {
                             ExecResult::Continue => {}
                             ExecResult::Break => {}
+                            ExecResult::LoopContinue => {}
                             ExecResult::Return(v) => return v,
                             ExecResult::Value(v) => result = v,
                         }
@@ -238,11 +239,13 @@ pub enum Stmt {
     },
     Return(Expr),
     Break,
+    Continue,
 }
 
 pub enum ExecResult {
     Continue,
     Break,
+    LoopContinue,
     Return(Value),
     Value(Value),
 }

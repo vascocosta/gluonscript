@@ -40,6 +40,7 @@ impl Parser {
             Some(Token::While) => self.parse_while(),
             Some(Token::Return) => self.parse_return(),
             Some(Token::Break) => self.parse_break(),
+            Some(Token::Continue) => self.parse_continue(),
             Some(Token::Ident(_)) => match self.peek_next() {
                 Some(Token::Equals) => self.parse_assign(),
                 Some(Token::PlusEquals) => self.parse_op_assign(Operator::Add),
@@ -247,6 +248,12 @@ impl Parser {
         self.consume();
 
         Stmt::Break
+    }
+
+    fn parse_continue(&mut self) -> Stmt {
+        self.consume();
+
+        Stmt::Continue
     }
 
     fn parse_expr(&mut self, min_prec: u8) -> Expr {

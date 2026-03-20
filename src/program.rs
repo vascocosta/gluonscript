@@ -54,6 +54,7 @@ impl Program {
                                 match Self::exec_stmt(stmt, env) {
                                     ExecResult::Continue => {}
                                     ExecResult::Break => return ExecResult::Continue,
+                                    ExecResult::LoopContinue => break,
                                     ExecResult::Return(v) => return ExecResult::Return(v),
                                     ExecResult::Value(_) => {}
                                 }
@@ -76,6 +77,7 @@ impl Program {
                                 match Self::exec_stmt(stmt, env) {
                                     ExecResult::Continue => {}
                                     ExecResult::Break => return ExecResult::Continue,
+                                    ExecResult::LoopContinue => break,
                                     ExecResult::Return(v) => return ExecResult::Return(v),
                                     ExecResult::Value(_) => {}
                                 }
@@ -105,6 +107,7 @@ impl Program {
                 ExecResult::Return(value)
             }
             Stmt::Break => ExecResult::Break,
+            Stmt::Continue => ExecResult::LoopContinue,
         }
     }
 
