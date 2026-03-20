@@ -3,6 +3,11 @@ use crate::lexer::Token;
 use crate::operators::Operator;
 use crate::program::Program;
 
+pub struct ParseError {
+    pub message: String,
+    pub pos: usize,
+}
+
 pub struct Parser {
     pub tokens: Vec<Token>,
     pub pos: usize,
@@ -23,17 +28,17 @@ impl Parser {
         t
     }
 
-    pub fn parse_program(&mut self) -> Program {
+    pub fn parse_program(&mut self) -> Result<Program, ParseError> {
         let mut statements = Vec::new();
 
         while self.peek().is_some() {
-            statements.push(self.parse_stmt());
+            statements.push(self.parse_stmt()?);
         }
 
-        Program { statements }
+        Ok(Program { statements })
     }
 
-    fn parse_stmt(&mut self) -> Stmt {
+    fn parse_stmt(&mut self) -> Result<Stmt, ParseError> {
         match self.peek() {
             Some(Token::If) => self.parse_if(),
             Some(Token::For) => self.parse_for(),
@@ -47,62 +52,77 @@ impl Parser {
                 Some(Token::MinusEquals) => self.parse_op_assign(Operator::Sub),
                 Some(Token::StarEquals) => self.parse_op_assign(Operator::Mul),
                 Some(Token::SlashEquals) => self.parse_op_assign(Operator::Div),
-                _ => Stmt::Expr(self.parse_expr(0)),
+                _ => Ok(Stmt::Expr(self.parse_expr(0)?)),
             },
             Some(Token::Fn) => self.parse_function(),
-            _ => Stmt::Expr(self.parse_expr(0)),
+            _ => Ok(Stmt::Expr(self.parse_expr(0)?)),
         }
     }
 
-    fn parse_assign(&mut self) -> Stmt {
+    fn parse_assign(&mut self) -> Result<Stmt, ParseError> {
         let name = match self.consume() {
             Some(Token::Ident(n)) => n,
-            _ => panic!("expected identifier"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected identifier".to_string(),
+                    pos: self.pos,
+                });
+            }
         };
 
         self.consume(); // Discard Token::Equals
 
-        let value = self.parse_expr(0);
+        let value = self.parse_expr(0)?;
 
-        Stmt::Assign { name, value }
+        Ok(Stmt::Assign { name, value })
     }
 
-    fn parse_op_assign(&mut self, op: Operator) -> Stmt {
+    fn parse_op_assign(&mut self, op: Operator) -> Result<Stmt, ParseError> {
         let name = match self.consume() {
             Some(Token::Ident(n)) => n,
-            _ => panic!("expected identifier"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected identifier".to_string(),
+                    pos: self.pos,
+                });
+            }
         };
 
         self.consume();
 
-        let value = self.parse_expr(0);
+        let value = self.parse_expr(0)?;
 
-        Stmt::Assign {
+        Ok(Stmt::Assign {
             name: name.clone(),
             value: Expr::Binary {
                 left: Box::new(Expr::Variable(name)),
                 op,
                 right: Box::new(value),
             },
-        }
+        })
     }
 
-    fn parse_if(&mut self) -> Stmt {
+    fn parse_if(&mut self) -> Result<Stmt, ParseError> {
         self.consume(); // Discard Token::If
 
-        let condition = self.parse_expr(0);
+        let condition = self.parse_expr(0)?;
 
         // Discard Token::LBrace
         match self.consume() {
             Some(Token::LBrace) => {}
-            _ => panic!("expected {{"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected {{".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
         let mut then_branch = Vec::new();
         let mut else_branch = Vec::new();
 
         while !matches!(self.peek(), Some(Token::RBrace)) {
-            then_branch.push(self.parse_stmt());
+            then_branch.push(self.parse_stmt()?);
         }
 
         self.consume();
@@ -112,90 +132,125 @@ impl Parser {
 
             match self.consume() {
                 Some(Token::LBrace) => {}
-                _ => panic!("expected {{"),
+                _ => {
+                    return Err(ParseError {
+                        message: "expected {{".to_string(),
+                        pos: self.pos,
+                    });
+                }
             }
 
             while !matches!(self.peek(), Some(Token::RBrace)) {
-                else_branch.push(self.parse_stmt());
+                else_branch.push(self.parse_stmt()?);
             }
 
             self.consume();
         }
 
-        Stmt::If {
+        Ok(Stmt::If {
             condition,
             then_branch,
             else_branch,
-        }
+        })
     }
 
-    fn parse_while(&mut self) -> Stmt {
-        self.consume(); // while
+    fn parse_while(&mut self) -> Result<Stmt, ParseError> {
+        self.consume();
 
-        let condition = self.parse_expr(0);
+        let condition = self.parse_expr(0)?;
 
         match self.consume() {
             Some(Token::LBrace) => {}
-            _ => panic!("expected {{"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected {{".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
         let mut body = Vec::new();
 
         while !matches!(self.peek(), Some(Token::RBrace)) {
-            body.push(self.parse_stmt());
+            body.push(self.parse_stmt()?);
         }
 
         self.consume(); // }
 
-        Stmt::While { condition, body }
+        Ok(Stmt::While { condition, body })
     }
 
-    fn parse_for(&mut self) -> Stmt {
+    fn parse_for(&mut self) -> Result<Stmt, ParseError> {
         self.consume();
 
         let var = match self.consume() {
             Some(Token::Ident(n)) => n,
-            _ => panic!("expected variable name"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected variable name".to_string(),
+                    pos: self.pos,
+                });
+            }
         };
 
         match self.consume() {
             Some(Token::In) => {}
-            _ => panic!("expected 'in'"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected 'in'".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
-        let iterable = self.parse_expr(0);
+        let iterable = self.parse_expr(0)?;
 
         match self.consume() {
             Some(Token::LBrace) => {}
-            _ => panic!("expected {{"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected {{identifier}}".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
         let mut body = Vec::new();
 
         while !matches!(self.peek(), Some(Token::RBrace)) {
-            body.push(self.parse_stmt());
+            body.push(self.parse_stmt()?);
         }
 
         self.consume();
 
-        Stmt::For {
+        Ok(Stmt::For {
             var,
             iterable,
             body,
-        }
+        })
     }
 
-    fn parse_function(&mut self) -> Stmt {
+    fn parse_function(&mut self) -> Result<Stmt, ParseError> {
         self.consume();
 
         let name = match self.consume() {
             Some(Token::Ident(n)) => n,
-            _ => panic!("expected function name"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected function name".to_string(),
+                    pos: self.pos,
+                });
+            }
         };
 
         match self.consume() {
             Some(Token::LParen) => {}
-            _ => panic!("expected '('"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected '('".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
         let mut params = Vec::new();
@@ -204,7 +259,12 @@ impl Parser {
             loop {
                 match self.consume() {
                     Some(Token::Ident(p)) => params.push(p),
-                    _ => panic!("expected parameter name"),
+                    _ => {
+                        return Err(ParseError {
+                            message: "expected parameter name".to_string(),
+                            pos: self.pos,
+                        });
+                    }
                 }
 
                 if matches!(self.peek(), Some(Token::Comma)) {
@@ -217,58 +277,73 @@ impl Parser {
 
         match self.consume() {
             Some(Token::RParen) => {}
-            _ => panic!("expected ')'"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected ')'".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
         match self.consume() {
             Some(Token::LBrace) => {}
-            _ => panic!("expected {{"),
+            _ => {
+                return Err(ParseError {
+                    message: "expected {{".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
         let mut body = Vec::new();
 
         while !matches!(self.peek(), Some(Token::RBrace)) {
-            body.push(self.parse_stmt());
+            body.push(self.parse_stmt()?);
         }
 
         self.consume();
 
-        Stmt::Function { name, params, body }
+        Ok(Stmt::Function { name, params, body })
     }
 
-    fn parse_return(&mut self) -> Stmt {
+    fn parse_return(&mut self) -> Result<Stmt, ParseError> {
         self.consume();
 
-        let expr = self.parse_expr(0);
+        let expr = self.parse_expr(0)?;
 
-        Stmt::Return(expr)
+        Ok(Stmt::Return(expr))
     }
 
-    fn parse_break(&mut self) -> Stmt {
+    fn parse_break(&mut self) -> Result<Stmt, ParseError> {
         self.consume();
 
-        Stmt::Break
+        Ok(Stmt::Break)
     }
 
-    fn parse_continue(&mut self) -> Stmt {
+    fn parse_continue(&mut self) -> Result<Stmt, ParseError> {
         self.consume();
 
-        Stmt::Continue
+        Ok(Stmt::Continue)
     }
 
-    fn parse_expr(&mut self, min_prec: u8) -> Expr {
-        let mut left = self.parse_primary();
+    fn parse_expr(&mut self, min_prec: u8) -> Result<Expr, ParseError> {
+        let mut left = self.parse_primary()?;
 
         loop {
             match self.peek() {
                 Some(Token::LBracket) => {
                     self.consume(); // [
 
-                    let index = self.parse_expr(0);
+                    let index = self.parse_expr(0)?;
 
                     match self.consume() {
                         Some(Token::RBracket) => {}
-                        _ => panic!("expected ']'"),
+                        _ => {
+                            return Err(ParseError {
+                                message: "expected ']'".to_string(),
+                                pos: self.pos,
+                            });
+                        }
                     }
 
                     left = Expr::Index {
@@ -282,7 +357,12 @@ impl Parser {
 
                     let name = match self.consume() {
                         Some(Token::Ident(n)) => n,
-                        _ => panic!("expected property name"),
+                        _ => {
+                            return Err(ParseError {
+                                message: "expected property name".to_string(),
+                                pos: self.pos,
+                            });
+                        }
                     };
 
                     left = Expr::Propery {
@@ -308,7 +388,7 @@ impl Parser {
 
             self.consume();
 
-            let right = self.parse_expr(prec + 1);
+            let right = self.parse_expr(prec + 1)?;
 
             left = Expr::Binary {
                 left: Box::new(left),
@@ -317,26 +397,26 @@ impl Parser {
             }
         }
 
-        left
+        Ok(left)
     }
 
-    fn parse_primary(&mut self) -> Expr {
+    fn parse_primary(&mut self) -> Result<Expr, ParseError> {
         if matches!(self.peek(), Some(Token::Minus)) {
             self.consume();
 
-            let expr = self.parse_primary();
+            let expr = self.parse_primary()?;
 
-            return Expr::Binary {
+            return Ok(Expr::Binary {
                 left: Box::new(Expr::Int(0)),
                 op: Operator::Sub,
                 right: Box::new(expr),
-            };
+            });
         }
 
         match self.consume() {
-            Some(Token::Int(n)) => Expr::Int(n),
-            Some(Token::Float(n)) => Expr::Float(n),
-            Some(Token::String(s)) => Expr::String(s),
+            Some(Token::Int(n)) => Ok(Expr::Int(n)),
+            Some(Token::Float(n)) => Ok(Expr::Float(n)),
+            Some(Token::String(s)) => Ok(Expr::String(s)),
             Some(Token::Ident(name)) => {
                 // check if this is a function call
                 if matches!(self.peek(), Some(Token::LParen)) {
@@ -347,7 +427,7 @@ impl Parser {
                     // parse arguments if any
                     if !matches!(self.peek(), Some(Token::RParen)) {
                         loop {
-                            args.push(self.parse_expr(0));
+                            args.push(self.parse_expr(0)?);
 
                             if matches!(self.peek(), Some(Token::Comma)) {
                                 self.consume(); // consume comma
@@ -359,12 +439,17 @@ impl Parser {
 
                     match self.consume() {
                         Some(Token::RParen) => {}
-                        _ => panic!("expected ')'"),
+                        _ => {
+                            return Err(ParseError {
+                                message: "expected ')'".to_string(),
+                                pos: self.pos,
+                            });
+                        }
                     }
 
-                    Expr::Call { name, args }
+                    Ok(Expr::Call { name, args })
                 } else {
-                    Expr::Variable(name)
+                    Ok(Expr::Variable(name))
                 }
             }
             Some(Token::LParen) => {
@@ -372,7 +457,12 @@ impl Parser {
 
                 match self.consume() {
                     Some(Token::RParen) => expr,
-                    _ => panic!("expected ')'"),
+                    _ => {
+                        return Err(ParseError {
+                            message: "expected ')'".to_string(),
+                            pos: self.pos,
+                        });
+                    }
                 }
             }
             Some(Token::LBracket) => {
@@ -380,7 +470,7 @@ impl Parser {
 
                 if !matches!(self.peek(), Some(Token::RBracket)) {
                     loop {
-                        elements.push(self.parse_expr(0));
+                        elements.push(self.parse_expr(0)?);
 
                         if matches!(self.peek(), Some(Token::Comma)) {
                             self.consume();
@@ -392,10 +482,15 @@ impl Parser {
 
                 match self.consume() {
                     Some(Token::RBracket) => {}
-                    _ => panic!("expected ']'"),
+                    _ => {
+                        return Err(ParseError {
+                            message: "expected ']'".to_string(),
+                            pos: self.pos,
+                        });
+                    }
                 }
 
-                Expr::ListLiteral(elements)
+                Ok(Expr::ListLiteral(elements))
             }
             Some(Token::LBrace) => {
                 let mut fields = Vec::new();
@@ -404,15 +499,25 @@ impl Parser {
                     loop {
                         let key = match self.consume() {
                             Some(Token::Ident(name)) => name,
-                            _ => panic!("expected key"),
+                            _ => {
+                                return Err(ParseError {
+                                    message: "expected key".to_string(),
+                                    pos: self.pos,
+                                });
+                            }
                         };
 
                         match self.consume() {
                             Some(Token::Colon) => {}
-                            _ => panic!("expected ':'"),
+                            _ => {
+                                return Err(ParseError {
+                                    message: "expected ':'".to_string(),
+                                    pos: self.pos,
+                                });
+                            }
                         }
 
-                        let value = self.parse_expr(0);
+                        let value = self.parse_expr(0)?;
 
                         fields.push((key, value));
 
@@ -426,13 +531,29 @@ impl Parser {
 
                 match self.consume() {
                     Some(Token::RBrace) => {}
-                    _ => panic!("expected }}"),
+                    _ => {
+                        return Err(ParseError {
+                            message: "expected }}".to_string(),
+                            pos: self.pos,
+                        });
+                    }
                 }
 
-                Expr::RecordLiteral(fields)
+                Ok(Expr::RecordLiteral(fields))
             }
 
-            other => panic!("unexpected token: {:?}", other),
+            other => {
+                let message = if let Some(token) = other {
+                    format!("unexpected token {:?}", token)
+                } else {
+                    "unexpected token".to_string()
+                };
+
+                return Err(ParseError {
+                    message,
+                    pos: self.pos,
+                });
+            }
         }
     }
 
