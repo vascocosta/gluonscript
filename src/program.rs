@@ -22,26 +22,16 @@ impl Program {
 
                 if let Value::Bool(true) = cond {
                     for stmt in then_branch {
-                        let res = Self::exec_stmt(stmt, env);
-
-                        if let ExecResult::Return(_) = res {
-                            return res;
-                        }
-
-                        if let ExecResult::Break = res {
-                            return ExecResult::Break;
+                        match Self::exec_stmt(stmt, env) {
+                            ExecResult::Continue | ExecResult::Value(_) => {}
+                            other => return other,
                         }
                     }
                 } else {
                     for stmt in else_branch {
-                        let res = Self::exec_stmt(stmt, env);
-
-                        if let ExecResult::Return(_) = res {
-                            return res;
-                        }
-
-                        if let ExecResult::Break = res {
-                            return ExecResult::Break;
+                        match Self::exec_stmt(stmt, env) {
+                            ExecResult::Continue | ExecResult::Value(_) => {}
+                            other => return other,
                         }
                     }
                 }
