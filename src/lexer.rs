@@ -1,3 +1,8 @@
+pub struct ScanError {
+    pub message: String,
+    pub pos: usize,
+}
+
 #[derive(Clone, Debug)]
 pub enum Token {
     Int(i64),
@@ -66,22 +71,19 @@ impl Lexer {
         ch
     }
 
-    pub fn tokenize(&mut self) -> Vec<Token> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, ScanError> {
         let mut tokens = Vec::new();
 
         while let Some(c) = self.peek() {
             match c {
-                // ignore whitespace
                 c if c.is_whitespace() => {
                     self.consume();
                 }
 
-                // numbers
                 c if c.is_ascii_digit() => {
-                    tokens.push(self.lex_number());
+                    tokens.push(self.lex_number()?);
                 }
 
-                // identifiers / keywords
                 c if c.is_ascii_alphabetic() => {
                     tokens.push(self.lex_identifier());
                 }
@@ -186,7 +188,10 @@ impl Lexer {
                         self.consume();
                         tokens.push(Token::Pipe);
                     } else {
-                        panic!("Unexpected character: {}", c);
+                        return Err(ScanError {
+                            message: format!("unexpected character {}", c),
+                            pos: self.pos,
+                        });
                     }
                 }
 
@@ -197,7 +202,10 @@ impl Lexer {
                         self.consume();
                         tokens.push(Token::Ampersand);
                     } else {
-                        panic!("Unexpected character: {}", c);
+                        return Err(ScanError {
+                            message: format!("unexpected character {}", c),
+                            pos: self.pos,
+                        });
                     }
                 }
 
@@ -233,7 +241,7 @@ impl Lexer {
 
                 '"' => {
                     self.consume();
-                    tokens.push(self.lex_string());
+                    tokens.push(self.lex_string()?);
                 }
 
                 ',' => {
@@ -263,14 +271,19 @@ impl Lexer {
                     }
                 }
 
-                _ => panic!("Unexpected character: {}", c),
+                _ => {
+                    return Err(ScanError {
+                        message: format!("unexpected character {}", c),
+                        pos: self.pos,
+                    });
+                }
             }
         }
 
-        tokens
+        Ok(tokens)
     }
 
-    fn lex_number(&mut self) -> Token {
+    fn lex_number(&mut self) -> Result<Token, ScanError> {
         let start = self.pos;
 
         while let Some(c) = self.peek() {
@@ -284,13 +297,19 @@ impl Lexer {
         let num: String = self.chars[start..self.pos].iter().collect();
 
         if num.contains(".") {
-            Token::Float(num.parse().expect("expected a number"))
+            Ok(Token::Float(num.parse().map_err(|_| ScanError {
+                message: "expected a float number".to_string(),
+                pos: self.pos,
+            })?))
         } else {
-            Token::Int(num.parse().expect("expected a number"))
+            Ok(Token::Int(num.parse().map_err(|_| ScanError {
+                message: "expected an int number".to_string(),
+                pos: self.pos,
+            })?))
         }
     }
 
-    fn lex_string(&mut self) -> Token {
+    fn lex_string(&mut self) -> Result<Token, ScanError> {
         let start = self.pos;
 
         while let Some(c) = self.peek() {
@@ -305,10 +324,15 @@ impl Lexer {
 
         match self.consume() {
             Some('"') => {}
-            _ => panic!("unterminated string"),
+            _ => {
+                return Err(ScanError {
+                    message: "unterminated string".to_string(),
+                    pos: self.pos,
+                });
+            }
         }
 
-        Token::String(string)
+        Ok(Token::String(string))
     }
 
     fn lex_identifier(&mut self) -> Token {

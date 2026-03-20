@@ -23,7 +23,17 @@ fn main() {
     });
 
     let mut lexer = Lexer::new(&source);
-    let tokens = lexer.tokenize();
+    let tokens = match lexer.tokenize() {
+        Ok(tokens) => tokens,
+        Err(e) => {
+            eprintln!(
+                "Error scanning program: {} at position: {}",
+                e.message, e.pos
+            );
+            process::exit(1);
+        }
+    };
+
     let mut parser = Parser { tokens, pos: 0 };
     let program = match parser.parse_program() {
         Ok(program) => program,
