@@ -27,6 +27,10 @@ impl Program {
                         if let ExecResult::Return(_) = res {
                             return res;
                         }
+
+                        if let ExecResult::Break = res {
+                            return ExecResult::Break;
+                        }
                     }
                 } else {
                     for stmt in else_branch {
@@ -34,6 +38,10 @@ impl Program {
 
                         if let ExecResult::Return(_) = res {
                             return res;
+                        }
+
+                        if let ExecResult::Break = res {
+                            return ExecResult::Break;
                         }
                     }
                 }
@@ -55,6 +63,7 @@ impl Program {
                             for stmt in body {
                                 match Self::exec_stmt(stmt, env) {
                                     ExecResult::Continue => {}
+                                    ExecResult::Break => return ExecResult::Continue,
                                     ExecResult::Return(v) => return ExecResult::Return(v),
                                     ExecResult::Value(_) => {}
                                 }
@@ -74,10 +83,11 @@ impl Program {
                     match cond {
                         Value::Bool(true) => {
                             for stmt in body {
-                                let res = Self::exec_stmt(stmt, env);
-
-                                if let ExecResult::Return(_) = res {
-                                    return res;
+                                match Self::exec_stmt(stmt, env) {
+                                    ExecResult::Continue => {}
+                                    ExecResult::Break => return ExecResult::Continue,
+                                    ExecResult::Return(v) => return ExecResult::Return(v),
+                                    ExecResult::Value(_) => {}
                                 }
                             }
                         }
@@ -104,6 +114,7 @@ impl Program {
                 let value = Expr::eval_expr(expr, env);
                 ExecResult::Return(value)
             }
+            Stmt::Break => ExecResult::Break,
         }
     }
 

@@ -158,6 +158,7 @@ impl Expr {
                     for stmt in &func.body {
                         match Program::exec_stmt(stmt, &mut local_env) {
                             ExecResult::Continue => {}
+                            ExecResult::Break => {}
                             ExecResult::Return(v) => return v,
                             ExecResult::Value(v) => result = v,
                         }
@@ -236,10 +237,12 @@ pub enum Stmt {
         body: Vec<Stmt>,
     },
     Return(Expr),
+    Break,
 }
 
 pub enum ExecResult {
     Continue,
+    Break,
     Return(Value),
     Value(Value),
 }
