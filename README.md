@@ -87,7 +87,7 @@ Output:
 ### Example 3
 
 ```Rust
-# Define a function that "updates" a user (records are immutable)
+# Define a function that "updates" a user (records are immutable).
 fn birthday(user) {
     return {
         name: user.name,
@@ -95,7 +95,7 @@ fn birthday(user) {
     }
 }
 
-# Create a record
+# Create a record.
 user = {
     name: "Vasco",
     age: 25
@@ -105,7 +105,7 @@ println("User:")
 println("Name: " + user.name)
 println("Age: " + string(user.age))
 
-# Create a new updated record
+# Create a new updated record.
 updated = birthday(user)
 
 println()
@@ -128,6 +128,9 @@ Age: 26
 
 ```Rust
 fn get_weather(location) {
+    # Get may fail so it returns { "error": Bool, "value": Value }.
+    # The last expression is returned even without the return keyword.
+    # A function returns an expression that evaluates to a value and is returned.
     get("https://wttr.in/" + location + "?format=3")
 }
 
@@ -141,6 +144,11 @@ fn main() {
 
     result = get_weather(args[2])
 
+    # By convention functions that might fail return { "error": Bool, "value": Value }.
+    # Checking this record for an error is a common pattern in gluonscript.
+    # If error is true, value shows its message as a string.
+    # Otherwise if error is false, value shows whatever value the function returns.
+    # This is similar in spirit to what languages like Go or Rust do.
     if result.error {
         println("Could not fetch weather: " + result.value)
     } else {
