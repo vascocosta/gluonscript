@@ -4,18 +4,20 @@ A dynamically typed language with the bare minimum features to be enjoyable and 
 
 ## Features
 
-* Immutable values
-* Lists
-* Records
+* Minimalist but ergonomic and consistent syntax
+* Lists (immutable Python-like lists)
+* Records (immutable Javascript-like objects)
 * First-class functions
 * Lambdas
 * Closures
 * Easy collection iteration
+* Functions that might fail return { "error": Bool, "value": Value }
 * One single way to do things
 * Rich built-in std library
 * Balanced imperative/functional style
 * Ideal for new programmers
 * Ideal for experienced programmers
+* Implemented in Rust taking advantage of its ownership model (no GC)
 
 ## Examples
 
