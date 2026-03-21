@@ -52,6 +52,40 @@ Output:
 ### Example 2
 
 ```Rust
+```
+fn even_odd(numbers) {
+    even = []
+    odd = []
+    all = []
+
+    i = 0
+    while i < len(numbers) {
+        if numbers[i] % 2 == 0 {
+            even = append(even, numbers[i])
+        } else {
+            odd = append(odd, numbers[i])
+        }
+
+        i += 1
+    }
+
+    all = append(all, even)
+    all = append(all, odd)
+
+    return all
+}
+
+numbers = [1, 2, 3, 4, 5, 6]
+
+println(even_odd(numbers))
+```
+Output:
+[List([Int(2), Int(4), Int(6)]), List([Int(1), Int(3), Int(5)])]
+```
+
+### Example 3
+
+```Rust
 fn get_weather(location) {
     get("https://wttr.in/" + location + "?format=3")
 }
