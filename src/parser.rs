@@ -447,7 +447,10 @@ impl Parser {
                         }
                     }
 
-                    Ok(Expr::Call { name, args })
+                    Ok(Expr::Call {
+                        callee: Box::new(Expr::Variable(name)),
+                        args,
+                    })
                 } else {
                     Ok(Expr::Variable(name))
                 }
@@ -540,6 +543,49 @@ impl Parser {
                 }
 
                 Ok(Expr::RecordLiteral(fields))
+            }
+            Some(Token::Fn) => {
+                match self.consume() {
+                    Some(Token::LParen) => {}
+                    _ => panic!("expected '('"),
+                }
+
+                let mut params = Vec::new();
+
+                if !matches!(self.peek(), Some(Token::RParen)) {
+                    loop {
+                        match self.consume() {
+                            Some(Token::Ident(p)) => params.push(p),
+                            _ => panic!("expected parameter name"),
+                        }
+
+                        if matches!(self.peek(), Some(Token::Comma)) {
+                            self.consume();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                match self.consume() {
+                    Some(Token::RParen) => {}
+                    _ => panic!("expected ')'"),
+                }
+
+                match self.consume() {
+                    Some(Token::LBrace) => {}
+                    _ => panic!("expected {{"),
+                }
+
+                let mut body = Vec::new();
+
+                while !matches!(self.peek(), Some(Token::RBrace)) {
+                    body.push(self.parse_stmt()?);
+                }
+
+                self.consume();
+
+                Ok(Expr::Lambda { params, body })
             }
 
             other => {

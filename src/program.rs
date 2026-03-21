@@ -106,13 +106,14 @@ impl Program {
                 Ok(ExecResult::Continue)
             }
             Stmt::Function { name, params, body } => {
-                env.functions.insert(
-                    name.clone(),
-                    Function {
-                        params: params.clone(),
-                        body: body.clone(),
-                    },
-                );
+                let func = Function {
+                    params: params.clone(),
+                    body: body.clone(),
+                    env: env.clone(),
+                };
+
+                env.set(name.clone(), Value::Function(func));
+
                 Ok(ExecResult::Continue)
             }
             Stmt::Return(expr) => {

@@ -16,7 +16,7 @@ pub enum Expr {
         right: Box<Expr>,
     },
     Call {
-        name: String,
+        callee: Box<Expr>,
         args: Vec<Expr>,
     },
     ListLiteral(Vec<Expr>),
@@ -29,6 +29,10 @@ pub enum Expr {
         target: Box<Expr>,
         name: String,
     },
+    Lambda {
+        params: Vec<String>,
+        body: Vec<Stmt>,
+    },
 }
 
 impl Expr {
@@ -37,7 +41,9 @@ impl Expr {
             Expr::Int(n) => Ok(Value::Int(*n)),
             Expr::Float(n) => Ok(Value::Float(*n)),
             Expr::String(s) => Ok(Value::String(s.to_owned())),
-            Expr::Variable(name) => Ok(env.get_vars(name)?),
+            Expr::Variable(name) => Ok(env.get_vars(name).ok_or(RuntimeError {
+                message: format!("undefined variable: {}", name),
+            })?),
             Expr::Binary { left, op, right } => {
                 let l = Self::eval_expr(left, env)?;
                 let r = Self::eval_expr(right, env)?;
@@ -174,32 +180,68 @@ impl Expr {
                     }),
                 }
             }
-            Expr::Call { name, args } => {
+            Expr::Call { callee, args } => {
                 let values: Result<Vec<Value>, RuntimeError> =
                     args.iter().map(|a| Self::eval_expr(a, env)).collect();
 
-                if let Some(func) = env.get_functions(name) {
-                    let mut local_env = env.child();
+                // FIRST: handle variable calls (builtins or user functions)
+                if let Expr::Variable(name) = callee.as_ref() {
+                    // try user-defined function
+                    if let Some(Value::Function(func)) = env.get_vars(name) {
+                        let mut local_env = func.env.child();
 
-                    for (param, value) in func.params.iter().zip(values?) {
-                        local_env.set(param.clone(), value);
-                    }
-
-                    let mut result = Value::Bool(false);
-
-                    for stmt in &func.body {
-                        match Program::exec_stmt(stmt, &mut local_env)? {
-                            ExecResult::Continue => {}
-                            ExecResult::Break => {}
-                            ExecResult::LoopContinue => {}
-                            ExecResult::Return(v) => return Ok(v),
-                            ExecResult::Value(v) => result = v,
+                        for (param, value) in func.params.iter().zip(values?) {
+                            local_env.set(param.clone(), value);
                         }
+
+                        let mut result = Value::Null;
+
+                        for stmt in &func.body {
+                            match Program::exec_stmt(stmt, &mut local_env)? {
+                                ExecResult::Continue => {}
+                                ExecResult::Break => {}
+                                ExecResult::LoopContinue => {}
+                                ExecResult::Return(v) => return Ok(v),
+                                ExecResult::Value(v) => result = v,
+                            }
+                        }
+
+                        return Ok(result);
                     }
 
-                    Ok(result)
-                } else {
-                    Ok(builtin::call_builtin(name, &values?))
+                    // fallback to builtin
+                    return Ok(builtin::call_builtin(name, &values?));
+                }
+
+                // only now evaluate callee (for lambdas, etc.)
+                let func_val = Self::eval_expr(callee, env)?;
+
+                match func_val {
+                    Value::Function(func) => {
+                        let mut local_env = func.env.child();
+
+                        for (param, value) in func.params.iter().zip(values?) {
+                            local_env.set(param.clone(), value);
+                        }
+
+                        let mut result = Value::Null;
+
+                        for stmt in &func.body {
+                            match Program::exec_stmt(stmt, &mut local_env)? {
+                                ExecResult::Continue => {}
+                                ExecResult::Break => {}
+                                ExecResult::LoopContinue => {}
+                                ExecResult::Return(v) => return Ok(v),
+                                ExecResult::Value(v) => result = v,
+                            }
+                        }
+
+                        Ok(result)
+                    }
+
+                    _ => Err(RuntimeError {
+                        message: format!("uncallable"),
+                    }),
                 }
             }
             Expr::ListLiteral(elements) => {
@@ -245,6 +287,11 @@ impl Expr {
                     }),
                 }
             }
+            Expr::Lambda { params, body } => Ok(Value::Function(Function {
+                params: params.clone(),
+                body: body.clone(),
+                env: env.clone(),
+            })),
         }
     }
 }
@@ -297,18 +344,19 @@ pub enum Value {
     Bool(bool),
     List(Vec<Value>),
     Record(HashMap<String, Value>),
+    Function(Function),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Function {
     pub params: Vec<String>,
     pub body: Vec<Stmt>,
+    pub env: Env,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Env {
     pub vars: HashMap<String, Value>,
-    pub functions: HashMap<String, Function>,
     pub parent: Option<Box<Env>>,
 }
 
@@ -316,7 +364,6 @@ impl Env {
     pub fn new() -> Self {
         Self {
             vars: HashMap::new(),
-            functions: HashMap::new(),
             parent: None,
         }
     }
@@ -324,32 +371,17 @@ impl Env {
     fn child(&self) -> Self {
         Self {
             vars: HashMap::new(),
-            functions: HashMap::new(),
             parent: Some(Box::new(self.clone())),
         }
     }
 
-    fn get_vars(&self, name: &str) -> Result<Value, RuntimeError> {
+    pub fn get_vars(&self, name: &str) -> Option<Value> {
         if let Some(v) = self.vars.get(name) {
-            return Ok(v.clone());
+            return Some(v.clone());
         }
 
         if let Some(parent) = &self.parent {
             return parent.get_vars(name);
-        }
-
-        Err(RuntimeError {
-            message: format!("undefined variable: {}", name),
-        })
-    }
-
-    fn get_functions(&self, name: &str) -> Option<Function> {
-        if let Some(f) = self.functions.get(name) {
-            return Some(f.clone());
-        }
-
-        if let Some(parent) = &self.parent {
-            return parent.get_functions(name);
         }
 
         None

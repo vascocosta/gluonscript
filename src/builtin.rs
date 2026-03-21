@@ -28,6 +28,7 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
                     Value::List(l) => print!("{:?}", l),
                     Value::Record(o) => print!("{:?}", o),
                     Value::Null => print!("Null"),
+                    Value::Function(f) => print!("{:?}", f),
                 }
             }
 
