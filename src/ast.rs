@@ -153,6 +153,9 @@ impl Expr {
                     (Value::String(a), Value::String(b), Operator::EqualEqual) => {
                         Ok(Value::Bool(a == b))
                     }
+                    (Value::Bool(a), Value::Bool(b), Operator::EqualEqual) => {
+                        Ok(Value::Bool(a == b))
+                    }
 
                     (Value::Int(a), Value::Int(b), Operator::NotEqual) => Ok(Value::Bool(a != b)),
                     (Value::Float(a), Value::Float(b), Operator::NotEqual) => {
@@ -167,6 +170,7 @@ impl Expr {
                     (Value::String(a), Value::String(b), Operator::NotEqual) => {
                         Ok(Value::Bool(a != b))
                     }
+                    (Value::Bool(a), Value::Bool(b), Operator::NotEqual) => Ok(Value::Bool(a != b)),
 
                     (Value::String(a), Value::String(b), Operator::Add) => {
                         Ok(Value::String(format!("{}{}", a, b)))
