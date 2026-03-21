@@ -1,9 +1,15 @@
-use std::{collections::HashMap, io};
+use std::{collections::HashMap, env, io};
 
 use crate::ast::Value;
 
 pub fn call_builtin(name: &str, args: &[Value]) -> Value {
     match name {
+        "args" => {
+            let args: Vec<String> = env::args().collect();
+            let values = args.iter().map(|a| Value::String(a.to_owned())).collect();
+
+            Value::List(values)
+        }
         "input" => {
             let mut buf: String = String::new();
             io::stdin()
