@@ -52,7 +52,6 @@ Output:
 ### Example 2
 
 ```Rust
-```
 fn even_odd(numbers) {
     even = []
     odd = []
@@ -78,6 +77,8 @@ fn even_odd(numbers) {
 numbers = [1, 2, 3, 4, 5, 6]
 
 println(even_odd(numbers))
+```
+
 ```
 Output:
 [List([Int(2), Int(4), Int(6)]), List([Int(1), Int(3), Int(5)])]
