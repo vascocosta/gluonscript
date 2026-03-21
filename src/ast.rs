@@ -25,7 +25,7 @@ pub enum Expr {
         index: Box<Expr>,
     },
     RecordLiteral(Vec<(String, Expr)>),
-    Propery {
+    Property {
         target: Box<Expr>,
         name: String,
     },
@@ -275,7 +275,7 @@ impl Expr {
 
                 Ok(Value::Record(map))
             }
-            Expr::Propery { target, name } => {
+            Expr::Property { target, name } => {
                 let record = Self::eval_expr(target, env)?;
 
                 match record {

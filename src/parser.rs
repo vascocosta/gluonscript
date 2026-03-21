@@ -365,7 +365,7 @@ impl Parser {
                         }
                     };
 
-                    left = Expr::Propery {
+                    left = Expr::Property {
                         target: Box::new(left),
                         name,
                     };
