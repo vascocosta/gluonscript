@@ -87,6 +87,46 @@ Output:
 ### Example 3
 
 ```Rust
+# Define a function that "updates" a user (records are immutable)
+fn birthday(user) {
+    return {
+        name: user.name,
+        age: user.age + 1
+    }
+}
+
+# Create a record
+user = {
+    name: "Vasco",
+    age: 25
+}
+
+println("User:")
+println("Name: " + user.name)
+println("Age: " + string(user.age))
+
+# Create a new updated record
+updated = birthday(user)
+
+println()
+println("After birthday:")
+println("Name: " + updated.name)
+println("Age: " + string(updated.age))
+```
+
+```
+User:
+Name: Vasco
+Age: 25
+
+After birthday:
+Name: Vasco
+Age: 26
+```
+
+### Example 4
+
+```Rust
 fn get_weather(location) {
     get("https://wttr.in/" + location + "?format=3")
 }
