@@ -154,6 +154,8 @@ pub fn import(args: &[Value]) -> Value {
 
                 let mut env = Env::new();
 
+                env.prelude();
+
                 for stmt in &program.statements {
                     Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
                 }
