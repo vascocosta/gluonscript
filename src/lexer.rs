@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct ScanError {
     pub message: String,
     pub pos: usize,

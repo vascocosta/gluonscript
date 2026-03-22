@@ -1,6 +1,11 @@
+use std::fs::read_to_string;
+
 use std::{collections::HashMap, env, io};
 
-use crate::ast::Value;
+use crate::ast::{Env, Value};
+use crate::lexer::Lexer;
+use crate::parser::Parser;
+use crate::program::Program;
 
 pub fn call_builtin(name: &str, args: &[Value]) -> Value {
     match name {
@@ -116,6 +121,28 @@ pub fn call_builtin(name: &str, args: &[Value]) -> Value {
                 }
             }
             _ => panic!("get expects a string argument"),
+        },
+        "import" => match &args[0] {
+            Value::String(s) => {
+                let source = read_to_string(s).expect("import: could not read source file");
+
+                let mut lexer = Lexer::new(&source);
+                let tokens = lexer.tokenize().expect("import: could not tokenize source");
+
+                let mut parser = Parser { tokens, pos: 0 };
+                let program = parser
+                    .parse_program()
+                    .expect("import: could not parse program");
+
+                let mut env = Env::new();
+
+                for stmt in &program.statements {
+                    Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
+                }
+
+                Value::Record(env.vars)
+            }
+            _ => panic!("import expects a string argument"),
         },
         _ => panic!("unknown function {}", name),
     }

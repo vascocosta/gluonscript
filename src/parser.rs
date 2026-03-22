@@ -3,6 +3,7 @@ use crate::lexer::Token;
 use crate::operators::Operator;
 use crate::program::Program;
 
+#[derive(Debug)]
 pub struct ParseError {
     pub message: String,
     pub pos: usize,
@@ -368,6 +369,39 @@ impl Parser {
                     left = Expr::Property {
                         target: Box::new(left),
                         name,
+                    };
+                }
+
+                Some(Token::LParen) => {
+                    self.consume(); // (
+
+                    let mut args = Vec::new();
+
+                    if !matches!(self.peek(), Some(Token::RParen)) {
+                        loop {
+                            args.push(self.parse_expr(0)?);
+
+                            if matches!(self.peek(), Some(Token::Comma)) {
+                                self.consume();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+
+                    match self.consume() {
+                        Some(Token::RParen) => {}
+                        _ => {
+                            return Err(ParseError {
+                                message: "expected ')'".to_string(),
+                                pos: self.pos,
+                            });
+                        }
+                    }
+
+                    left = Expr::Call {
+                        callee: Box::new(left),
+                        args,
                     };
                 }
 
