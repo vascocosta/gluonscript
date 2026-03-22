@@ -7,144 +7,244 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::program::Program;
 
-pub fn call_builtin(name: &str, args: &[Value]) -> Value {
-    match name {
-        "args" => {
-            let args: Vec<String> = env::args().collect();
-            let values = args.iter().map(|a| Value::String(a.to_owned())).collect();
+pub fn io_module() -> Value {
+    let mut map = HashMap::new();
 
-            Value::List(values)
-        }
-        "input" => {
-            let mut buf: String = String::new();
-            io::stdin()
-                .read_line(&mut buf)
-                .expect("input expects stdin to work");
+    map.insert("input".to_string(), Value::BuiltinFunction(input));
+    map.insert("print".to_string(), Value::BuiltinFunction(print));
+    map.insert("println".to_string(), Value::BuiltinFunction(println));
 
-            Value::String(buf.trim_end_matches(['\n', '\r']).to_string())
-        }
-        "print" | "println" => {
-            for a in args {
-                match a {
-                    Value::Int(n) => print!("{}", n),
-                    Value::Float(n) => print!("{}", n),
-                    Value::Bool(b) => print!("{}", b),
-                    Value::String(s) => print!("{}", s),
-                    Value::List(l) => print!("{:?}", l),
-                    Value::Record(o) => print!("{:?}", o),
-                    Value::Null => print!("Null"),
-                    Value::Function(f) => print!("{:?}", f),
-                }
+    Value::Record(map)
+}
+
+pub fn conv_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("float".to_string(), Value::BuiltinFunction(float));
+    map.insert("int".to_string(), Value::BuiltinFunction(int));
+    map.insert("string".to_string(), Value::BuiltinFunction(string));
+
+    Value::Record(map)
+}
+
+pub fn core_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("import".to_string(), Value::BuiltinFunction(import));
+    map.insert("len".to_string(), Value::BuiltinFunction(len));
+
+    Value::Record(map)
+}
+
+pub fn env_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("args".to_string(), Value::BuiltinFunction(args));
+
+    Value::Record(map)
+}
+
+pub fn http_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("get".to_string(), Value::BuiltinFunction(get));
+
+    Value::Record(map)
+}
+
+pub fn json_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("parse".to_string(), Value::BuiltinFunction(parse));
+
+    Value::Record(map)
+}
+
+pub fn lists_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("append".to_string(), Value::BuiltinFunction(append));
+    map.insert("len".to_string(), Value::BuiltinFunction(len));
+
+    Value::Record(map)
+}
+
+pub fn append(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::List(v) => {
+            if args.len() != 2 {
+                panic!("append expects 2 arguments")
             }
 
-            if name == "println" {
-                println!();
-            }
+            let mut new_list = v.clone();
 
-            Value::Bool(true)
+            new_list.push(args[1].clone());
+
+            Value::List(new_list)
         }
-        "int" => match &args[0] {
-            Value::String(s) => Value::Int(
-                s.trim_ascii()
-                    .parse()
-                    .expect("int expects a valid number string"),
-            ),
-            _ => panic!("int expects a string"),
-        },
-        "float" => match &args[0] {
-            Value::String(s) => Value::Float(
-                s.trim_ascii()
-                    .parse()
-                    .expect("float expects a valid number string"),
-            ),
-            _ => panic!("float expects a string"),
-        },
-        "len" => match &args[0] {
-            Value::List(v) => Value::Int(v.len() as i64),
-            Value::String(s) => Value::Int(s.len() as i64),
-            _ => panic!("len() unsupported type"),
-        },
-        "append" => match &args[0] {
-            Value::List(v) => {
-                if args.len() != 2 {
-                    panic!("append expects 2 arguments")
-                }
+        _ => panic!("append expects a list"),
+    }
+}
 
-                let mut new_list = v.clone();
+pub fn args(_: &[Value]) -> Value {
+    let args: Vec<String> = env::args().collect();
+    let values = args.iter().map(|a| Value::String(a.to_owned())).collect();
 
-                new_list.push(args[1].clone());
+    Value::List(values)
+}
 
-                Value::List(new_list)
-            }
-            _ => panic!("append expects a list"),
-        },
-        "string" => match &args[0] {
-            Value::Int(n) => Value::String(n.to_string()),
-            Value::Float(n) => Value::String(n.to_string()),
-            Value::Bool(b) => Value::String(b.to_string()),
-            Value::List(l) => Value::String(format!("{:?}", l)),
-            Value::Record(r) => Value::String(format!("{:?}", r)),
-            _ => panic!("unable to convert type to string"),
-        },
-        "json" => match &args[0] {
-            Value::String(s) => match serde_json::from_str(s) {
-                Ok(parsed_json) => Value::Record(HashMap::from([
-                    ("error".to_string(), Value::Bool(false)),
-                    ("value".to_string(), json_to_value(parsed_json)),
-                ])),
-                Err(e) => Value::Record(HashMap::from([
-                    ("error".to_string(), Value::Bool(true)),
-                    ("value".to_string(), Value::String(e.to_string())),
-                ])),
-            },
-            _ => panic!("json expects a string argument"),
-        },
-        "get" => match &args[0] {
-            Value::String(s) => {
-                let response = reqwest::blocking::get(s);
+pub fn float(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::String(s) => Value::Float(
+            s.trim_ascii()
+                .parse()
+                .expect("float expects a valid number string"),
+        ),
+        _ => panic!("float expects a string"),
+    }
+}
 
-                match response {
-                    Ok(reponse) => match reponse.text() {
-                        Ok(text) => Value::Record(HashMap::from([
-                            ("error".to_string(), Value::Bool(false)),
-                            ("value".to_string(), Value::String(text)),
-                        ])),
-                        Err(e) => Value::Record(HashMap::from([
-                            ("error".to_string(), Value::Bool(true)),
-                            ("value".to_string(), Value::String(e.to_string())),
-                        ])),
-                    },
+pub fn get(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::String(s) => {
+            let response = reqwest::blocking::get(s);
+
+            match response {
+                Ok(reponse) => match reponse.text() {
+                    Ok(text) => Value::Record(HashMap::from([
+                        ("error".to_string(), Value::Bool(false)),
+                        ("value".to_string(), Value::String(text)),
+                    ])),
                     Err(e) => Value::Record(HashMap::from([
                         ("error".to_string(), Value::Bool(true)),
                         ("value".to_string(), Value::String(e.to_string())),
                     ])),
-                }
+                },
+                Err(e) => Value::Record(HashMap::from([
+                    ("error".to_string(), Value::Bool(true)),
+                    ("value".to_string(), Value::String(e.to_string())),
+                ])),
             }
-            _ => panic!("get expects a string argument"),
-        },
-        "import" => match &args[0] {
-            Value::String(s) => {
-                let source = read_to_string(s).expect("import: could not read source file");
+        }
+        _ => panic!("get expects a string argument"),
+    }
+}
 
-                let mut lexer = Lexer::new(&source);
-                let tokens = lexer.tokenize().expect("import: could not tokenize source");
+pub fn import(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::String(s) => {
+            let source = read_to_string(s).expect("import: could not read source file");
 
-                let mut parser = Parser { tokens, pos: 0 };
-                let program = parser
-                    .parse_program()
-                    .expect("import: could not parse program");
+            let mut lexer = Lexer::new(&source);
+            let tokens = lexer.tokenize().expect("import: could not tokenize source");
 
-                let mut env = Env::new();
+            let mut parser = Parser { tokens, pos: 0 };
+            let program = parser
+                .parse_program()
+                .expect("import: could not parse program");
 
-                for stmt in &program.statements {
-                    Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
-                }
+            let mut env = Env::new();
 
-                Value::Record(env.vars)
+            for stmt in &program.statements {
+                Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
             }
-            _ => panic!("import expects a string argument"),
+
+            Value::Record(env.vars)
+        }
+        _ => panic!("import expects a string argument"),
+    }
+}
+
+pub fn input(_: &[Value]) -> Value {
+    let mut buf: String = String::new();
+    io::stdin()
+        .read_line(&mut buf)
+        .expect("input expects stdin to work");
+
+    Value::String(buf.trim_end_matches(['\n', '\r']).to_string())
+}
+
+pub fn int(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::String(s) => Value::Int(
+            s.trim_ascii()
+                .parse()
+                .expect("int expects a valid number string"),
+        ),
+        _ => panic!("int expects a string"),
+    }
+}
+
+pub fn parse(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::String(s) => match serde_json::from_str(s) {
+            Ok(parsed_json) => Value::Record(HashMap::from([
+                ("error".to_string(), Value::Bool(false)),
+                ("value".to_string(), json_to_value(parsed_json)),
+            ])),
+            Err(e) => Value::Record(HashMap::from([
+                ("error".to_string(), Value::Bool(true)),
+                ("value".to_string(), Value::String(e.to_string())),
+            ])),
         },
-        _ => panic!("unknown function {}", name),
+        _ => panic!("json expects a string argument"),
+    }
+}
+
+pub fn len(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::List(v) => Value::Int(v.len() as i64),
+        Value::String(s) => Value::Int(s.len() as i64),
+        _ => panic!("len() unsupported type"),
+    }
+}
+
+pub fn print(args: &[Value]) -> Value {
+    for a in args {
+        match a {
+            Value::Int(n) => print!("{}", n),
+            Value::Float(n) => print!("{}", n),
+            Value::Bool(b) => print!("{}", b),
+            Value::String(s) => print!("{}", s),
+            Value::List(l) => print!("{:?}", l),
+            Value::Record(o) => print!("{:?}", o),
+            Value::Null => print!("Null"),
+            Value::Function(f) => print!("{:?}", f),
+            Value::BuiltinFunction(f) => print!("{:?}", f),
+        }
+    }
+
+    Value::Bool(true)
+}
+
+pub fn println(args: &[Value]) -> Value {
+    for a in args {
+        match a {
+            Value::Int(n) => print!("{}", n),
+            Value::Float(n) => print!("{}", n),
+            Value::Bool(b) => print!("{}", b),
+            Value::String(s) => print!("{}", s),
+            Value::List(l) => print!("{:?}", l),
+            Value::Record(o) => print!("{:?}", o),
+            Value::Null => print!("Null"),
+            Value::Function(f) => print!("{:?}", f),
+            Value::BuiltinFunction(f) => print!("{:?}", f),
+        }
+    }
+
+    println!();
+
+    Value::Bool(true)
+}
+
+pub fn string(args: &[Value]) -> Value {
+    match &args[0] {
+        Value::Int(n) => Value::String(n.to_string()),
+        Value::Float(n) => Value::String(n.to_string()),
+        Value::Bool(b) => Value::String(b.to_string()),
+        Value::List(l) => Value::String(format!("{:?}", l)),
+        Value::Record(r) => Value::String(format!("{:?}", r)),
+        _ => panic!("unable to convert type to string"),
     }
 }
 

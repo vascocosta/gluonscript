@@ -1,4 +1,7 @@
-use crate::ast::{Env, ExecResult, Expr, Function, Stmt, Value};
+use crate::{
+    ast::{Env, ExecResult, Expr, Function, Stmt, Value},
+    builtin,
+};
 
 #[derive(Debug)]
 pub struct RuntimeError {
@@ -128,6 +131,14 @@ impl Program {
     pub fn run(&self) -> Result<ExecResult, RuntimeError> {
         let mut env = Env::new();
         let mut last = ExecResult::Continue;
+
+        env.set("conv".to_string(), builtin::conv_module());
+        env.set("core".to_string(), builtin::core_module());
+        env.set("env".to_string(), builtin::env_module());
+        env.set("http".to_string(), builtin::http_module());
+        env.set("io".to_string(), builtin::io_module());
+        env.set("json".to_string(), builtin::json_module());
+        env.set("lists".to_string(), builtin::lists_module());
 
         for stmt in &self.statements {
             if let ExecResult::Value(v) = Self::exec_stmt(stmt, &mut env)? {

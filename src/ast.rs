@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::operators::Operator;
+use crate::program::Program;
 use crate::program::RuntimeError;
-use crate::{builtin, program::Program};
 
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -188,36 +188,6 @@ impl Expr {
                 let values: Result<Vec<Value>, RuntimeError> =
                     args.iter().map(|a| Self::eval_expr(a, env)).collect();
 
-                // FIRST: handle variable calls (builtins or user functions)
-                if let Expr::Variable(name) = callee.as_ref() {
-                    // try user-defined function
-                    if let Some(Value::Function(func)) = env.get_vars(name) {
-                        let mut local_env = func.env.child();
-
-                        for (param, value) in func.params.iter().zip(values?) {
-                            local_env.set(param.clone(), value);
-                        }
-
-                        let mut result = Value::Null;
-
-                        for stmt in &func.body {
-                            match Program::exec_stmt(stmt, &mut local_env)? {
-                                ExecResult::Continue => {}
-                                ExecResult::Break => {}
-                                ExecResult::LoopContinue => {}
-                                ExecResult::Return(v) => return Ok(v),
-                                ExecResult::Value(v) => result = v,
-                            }
-                        }
-
-                        return Ok(result);
-                    }
-
-                    // fallback to builtin
-                    return Ok(builtin::call_builtin(name, &values?));
-                }
-
-                // only now evaluate callee (for lambdas, etc.)
                 let func_val = Self::eval_expr(callee, env)?;
 
                 match func_val {
@@ -242,6 +212,8 @@ impl Expr {
 
                         Ok(result)
                     }
+
+                    Value::BuiltinFunction(f) => Ok(f(&values?)),
 
                     _ => Err(RuntimeError {
                         message: format!("uncallable"),
@@ -349,6 +321,7 @@ pub enum Value {
     List(Vec<Value>),
     Record(HashMap<String, Value>),
     Function(Function),
+    BuiltinFunction(fn(&[Value]) -> Value),
 }
 
 #[derive(Clone, Debug)]
