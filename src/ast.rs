@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::builtin;
 use crate::operators::Operator;
 use crate::program::Program;
 use crate::program::RuntimeError;
@@ -362,6 +363,15 @@ impl Env {
         }
 
         None
+    }
+
+    pub fn prelude(&mut self) {
+        self.set(
+            "import".to_string(),
+            Value::BuiltinFunction(builtin::import),
+        );
+
+        self.set("len".to_string(), Value::BuiltinFunction(builtin::len));
     }
 
     pub fn set(&mut self, name: String, value: Value) {

@@ -7,16 +7,6 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::program::Program;
 
-pub fn io_module() -> Value {
-    let mut map = HashMap::new();
-
-    map.insert("input".to_string(), Value::BuiltinFunction(input));
-    map.insert("print".to_string(), Value::BuiltinFunction(print));
-    map.insert("println".to_string(), Value::BuiltinFunction(println));
-
-    Value::Record(map)
-}
-
 pub fn conv_module() -> Value {
     let mut map = HashMap::new();
 
@@ -48,6 +38,16 @@ pub fn http_module() -> Value {
     let mut map = HashMap::new();
 
     map.insert("get".to_string(), Value::BuiltinFunction(get));
+
+    Value::Record(map)
+}
+
+pub fn io_module() -> Value {
+    let mut map = HashMap::new();
+
+    map.insert("input".to_string(), Value::BuiltinFunction(input));
+    map.insert("print".to_string(), Value::BuiltinFunction(print));
+    map.insert("println".to_string(), Value::BuiltinFunction(println));
 
     Value::Record(map)
 }
@@ -132,25 +132,36 @@ pub fn get(args: &[Value]) -> Value {
 
 pub fn import(args: &[Value]) -> Value {
     match &args[0] {
-        Value::String(s) => {
-            let source = read_to_string(s).expect("import: could not read source file");
+        Value::String(s) => match s.as_str() {
+            "conv" => conv_module(),
+            "core" => core_module(),
+            "env" => env_module(),
+            "http" => http_module(),
+            "io" => io_module(),
+            "json" => json_module(),
+            "lists" => lists_module(),
 
-            let mut lexer = Lexer::new(&source);
-            let tokens = lexer.tokenize().expect("import: could not tokenize source");
+            _ => {
+                let source = read_to_string(s).expect("import: could not read source file");
 
-            let mut parser = Parser { tokens, pos: 0 };
-            let program = parser
-                .parse_program()
-                .expect("import: could not parse program");
+                let mut lexer = Lexer::new(&source);
+                let tokens = lexer.tokenize().expect("import: could not tokenize source");
 
-            let mut env = Env::new();
+                let mut parser = Parser { tokens, pos: 0 };
+                let program = parser
+                    .parse_program()
+                    .expect("import: could not parse program");
 
-            for stmt in &program.statements {
-                Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
+                let mut env = Env::new();
+
+                for stmt in &program.statements {
+                    Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
+                }
+
+                Value::Record(env.vars)
             }
+        },
 
-            Value::Record(env.vars)
-        }
         _ => panic!("import expects a string argument"),
     }
 }
