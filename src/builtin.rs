@@ -5,7 +5,6 @@ use std::{collections::HashMap, env, io};
 use crate::ast::{Env, Value};
 use crate::lexer::Lexer;
 use crate::parser::Parser;
-use crate::program::Program;
 
 pub fn conv_module() -> Value {
     let mut map = HashMap::new();
@@ -157,7 +156,8 @@ pub fn import(args: &[Value]) -> Value {
                 env.prelude();
 
                 for stmt in &program.statements {
-                    Program::exec_stmt(stmt, &mut env).expect("import: could not import module");
+                    stmt.exec(&mut env)
+                        .expect("import: could not import module");
                 }
 
                 Value::Record(env.vars)
