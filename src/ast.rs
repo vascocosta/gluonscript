@@ -36,39 +36,53 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn eval_expr(expr: &Expr, env: &Env) -> Result<Value, RuntimeError> {
-        match expr {
+    pub fn eval(&self, env: &Env) -> Result<Value, RuntimeError> {
+        match self {
             Expr::Int(n) => Ok(Value::Int(*n)),
             Expr::Float(n) => Ok(Value::Float(*n)),
             Expr::String(s) => Ok(Value::String(s.to_owned())),
+
             Expr::Variable(name) => Ok(env.get_vars(name).ok_or(RuntimeError {
                 message: format!("undefined variable: {}", name),
             })?),
+
             Expr::Binary { left, op, right } => {
-                let l = Self::eval_expr(left, env)?;
-                let r = Self::eval_expr(right, env)?;
+                let l = left.eval(env)?;
+                let r = right.eval(env)?;
 
                 match (l, r, op) {
+                    // Operator::Add
                     (Value::Int(a), Value::Int(b), Operator::Add) => Ok(Value::Int(a + b)),
                     (Value::Float(a), Value::Float(b), Operator::Add) => Ok(Value::Float(a + b)),
+
                     (Value::Int(a), Value::Float(b), Operator::Add) => {
                         Ok(Value::Float(a as f64 + b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::Add) => {
                         Ok(Value::Float(a + b as f64))
                     }
 
+                    (Value::String(a), Value::String(b), Operator::Add) => {
+                        Ok(Value::String(format!("{}{}", a, b)))
+                    }
+
+                    // Operator::Sub
                     (Value::Int(a), Value::Int(b), Operator::Sub) => Ok(Value::Int(a - b)),
                     (Value::Float(a), Value::Float(b), Operator::Sub) => Ok(Value::Float(a - b)),
+
                     (Value::Int(a), Value::Float(b), Operator::Sub) => {
                         Ok(Value::Float(a as f64 - b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::Sub) => {
                         Ok(Value::Float(a - b as f64))
                     }
 
+                    // Operator::Mul
                     (Value::Int(a), Value::Int(b), Operator::Mul) => Ok(Value::Int(a * b)),
                     (Value::Float(a), Value::Float(b), Operator::Mul) => Ok(Value::Float(a * b)),
+
                     (Value::Int(a), Value::Float(b), Operator::Mul) => {
                         Ok(Value::Float(a as f64 * b))
                     }
@@ -76,107 +90,139 @@ impl Expr {
                         Ok(Value::Float(a * b as f64))
                     }
 
+                    // Operator::Div
                     (Value::Int(a), Value::Int(b), Operator::Div) => Ok(Value::Int(a / b)),
                     (Value::Float(a), Value::Float(b), Operator::Div) => Ok(Value::Float(a / b)),
+
                     (Value::Int(a), Value::Float(b), Operator::Div) => {
                         Ok(Value::Float(a as f64 / b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::Div) => {
                         Ok(Value::Float(a / b as f64))
                     }
 
+                    // Operator::Greater
                     (Value::Int(a), Value::Int(b), Operator::Greater) => Ok(Value::Bool(a > b)),
                     (Value::Float(a), Value::Float(b), Operator::Greater) => Ok(Value::Bool(a > b)),
+
                     (Value::Int(a), Value::Float(b), Operator::Greater) => {
                         Ok(Value::Bool(a as f64 > b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::Greater) => {
                         Ok(Value::Bool(a > b as f64))
                     }
 
+                    // Operator::Smaller
                     (Value::Int(a), Value::Int(b), Operator::Smaller) => Ok(Value::Bool(a < b)),
                     (Value::Float(a), Value::Float(b), Operator::Smaller) => Ok(Value::Bool(a < b)),
+
                     (Value::Int(a), Value::Float(b), Operator::Smaller) => {
                         Ok(Value::Bool((a as f64) < b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::Smaller) => {
                         Ok(Value::Bool(a < b as f64))
                     }
 
+                    // Operator::GreaterEqual
                     (Value::Int(a), Value::Int(b), Operator::GreaterEqual) => {
                         Ok(Value::Bool(a >= b))
                     }
+
                     (Value::Float(a), Value::Float(b), Operator::GreaterEqual) => {
                         Ok(Value::Bool(a >= b))
                     }
+
                     (Value::Int(a), Value::Float(b), Operator::GreaterEqual) => {
                         Ok(Value::Bool(a as f64 >= b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::GreaterEqual) => {
                         Ok(Value::Bool(a >= b as f64))
                     }
 
+                    // Operator::SmallerEqual
                     (Value::Int(a), Value::Int(b), Operator::SmallerEqual) => {
                         Ok(Value::Bool(a <= b))
                     }
+
                     (Value::Float(a), Value::Float(b), Operator::SmallerEqual) => {
                         Ok(Value::Bool(a <= b))
                     }
+
                     (Value::Int(a), Value::Float(b), Operator::SmallerEqual) => {
                         Ok(Value::Bool(a as f64 <= b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::SmallerEqual) => {
                         Ok(Value::Bool(a <= b as f64))
                     }
 
+                    // Operator::Percent
                     (Value::Int(a), Value::Int(b), Operator::Percent) => Ok(Value::Int(a % b)),
+
                     (Value::Float(a), Value::Float(b), Operator::Percent) => {
                         Ok(Value::Float(a % b))
                     }
+
                     (Value::Int(a), Value::Float(b), Operator::Percent) => {
                         Ok(Value::Float(a as f64 % b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::Percent) => {
                         Ok(Value::Float(a % b as f64))
                     }
 
+                    // Operator::EqualEqual
                     (Value::Int(a), Value::Int(b), Operator::EqualEqual) => Ok(Value::Bool(a == b)),
+
                     (Value::Float(a), Value::Float(b), Operator::EqualEqual) => {
                         Ok(Value::Bool(a == b))
                     }
+
                     (Value::Int(a), Value::Float(b), Operator::EqualEqual) => {
                         Ok(Value::Bool(a as f64 == b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::EqualEqual) => {
                         Ok(Value::Bool(a == b as f64))
                     }
+
                     (Value::String(a), Value::String(b), Operator::EqualEqual) => {
                         Ok(Value::Bool(a == b))
                     }
+
                     (Value::Bool(a), Value::Bool(b), Operator::EqualEqual) => {
                         Ok(Value::Bool(a == b))
                     }
 
+                    // Operator::NotEqual
                     (Value::Int(a), Value::Int(b), Operator::NotEqual) => Ok(Value::Bool(a != b)),
+
                     (Value::Float(a), Value::Float(b), Operator::NotEqual) => {
                         Ok(Value::Bool(a != b))
                     }
+
                     (Value::Int(a), Value::Float(b), Operator::NotEqual) => {
                         Ok(Value::Bool(a as f64 != b))
                     }
+
                     (Value::Float(a), Value::Int(b), Operator::NotEqual) => {
                         Ok(Value::Bool(a != b as f64))
                     }
+
                     (Value::String(a), Value::String(b), Operator::NotEqual) => {
                         Ok(Value::Bool(a != b))
                     }
+
                     (Value::Bool(a), Value::Bool(b), Operator::NotEqual) => Ok(Value::Bool(a != b)),
 
-                    (Value::String(a), Value::String(b), Operator::Add) => {
-                        Ok(Value::String(format!("{}{}", a, b)))
-                    }
-
+                    // Operator::Or
                     (Value::Bool(a), Value::Bool(b), Operator::Or) => Ok(Value::Bool(a || b)),
+
+                    // Operator::And
                     (Value::Bool(a), Value::Bool(b), Operator::And) => Ok(Value::Bool(a && b)),
 
                     _ => Err(RuntimeError {
@@ -184,11 +230,12 @@ impl Expr {
                     }),
                 }
             }
+
             Expr::Call { callee, args } => {
                 let values: Result<Vec<Value>, RuntimeError> =
-                    args.iter().map(|a| Self::eval_expr(a, env)).collect();
+                    args.iter().map(|a| a.eval(env)).collect();
 
-                let func_val = Self::eval_expr(callee, env)?;
+                let func_val = callee.eval(env)?;
 
                 match func_val {
                     Value::Function(func) => {
@@ -220,15 +267,17 @@ impl Expr {
                     }),
                 }
             }
+
             Expr::ListLiteral(elements) => {
                 let values: Result<Vec<Value>, RuntimeError> =
-                    elements.iter().map(|e| Self::eval_expr(e, env)).collect();
+                    elements.iter().map(|e| e.eval(env)).collect();
 
                 Ok(Value::List(values?))
             }
+
             Expr::Index { target, index } => {
-                let list = Self::eval_expr(target, env)?;
-                let idx = Self::eval_expr(index, env)?;
+                let list = target.eval(env)?;
+                let idx = index.eval(env)?;
 
                 match (list, idx) {
                     (Value::List(v), Value::Int(i)) => {
@@ -242,17 +291,19 @@ impl Expr {
                     }),
                 }
             }
+
             Expr::RecordLiteral(fields) => {
                 let mut map = HashMap::new();
 
                 for (k, v) in fields {
-                    map.insert(k.clone(), Self::eval_expr(v, env)?);
+                    map.insert(k.clone(), v.eval(env)?);
                 }
 
                 Ok(Value::Record(map))
             }
+
             Expr::Property { target, name } => {
-                let record = Self::eval_expr(target, env)?;
+                let record = target.eval(env)?;
 
                 match record {
                     Value::Record(map) => Ok(map.get(name).cloned().ok_or(RuntimeError {
@@ -263,6 +314,7 @@ impl Expr {
                     }),
                 }
             }
+
             Expr::Lambda { params, body } => Ok(Value::Function(Function {
                 params: params.clone(),
                 body: body.clone(),
@@ -307,19 +359,19 @@ impl Stmt {
     pub fn exec(&self, env: &mut Env) -> Result<ExecResult, RuntimeError> {
         match self {
             Stmt::Assign { name, value } => {
-                let v = Expr::eval_expr(value, env)?;
+                let v = value.eval(env)?;
                 env.vars.insert(name.clone(), v);
                 Ok(ExecResult::Continue)
             }
 
-            Stmt::Expr(expr) => Ok(ExecResult::Value(Expr::eval_expr(expr, env)?)),
+            Stmt::Expr(expr) => Ok(ExecResult::Value(expr.eval(env)?)),
 
             Stmt::If {
                 condition,
                 then_branch,
                 else_branch,
             } => {
-                let cond = Expr::eval_expr(condition, env)?;
+                let cond = condition.eval(env)?;
 
                 if let Value::Bool(true) = cond {
                     for stmt in then_branch {
@@ -345,7 +397,7 @@ impl Stmt {
                 iterable,
                 body,
             } => {
-                let value = Expr::eval_expr(iterable, env)?;
+                let value = iterable.eval(env)?;
 
                 match value {
                     Value::List(items) => {
@@ -376,7 +428,7 @@ impl Stmt {
 
             Stmt::While { condition, body } => {
                 loop {
-                    let cond = Expr::eval_expr(condition, env)?;
+                    let cond = condition.eval(env)?;
 
                     match cond {
                         Value::Bool(true) => {
@@ -417,7 +469,7 @@ impl Stmt {
             }
 
             Stmt::Return(expr) => {
-                let value = Expr::eval_expr(expr, env)?;
+                let value = expr.eval(env)?;
                 Ok(ExecResult::Return(value))
             }
 
