@@ -309,7 +309,7 @@ impl Expr {
                         message: format!("unknown property: {}", name),
                     })?),
                     _ => Err(RuntimeError {
-                        message: "not a record".to_string(),
+                        message: format!("cannot access: {}, {:?} is not a record", name, target),
                     }),
                 }
             }
