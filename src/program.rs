@@ -1,9 +1,7 @@
-use crate::ast::{Env, ExecResult, Stmt};
-
-#[derive(Debug)]
-pub struct RuntimeError {
-    pub message: String,
-}
+use crate::{
+    ast::{ExecResult, Stmt},
+    runtime::{Env, RuntimeError},
+};
 
 pub struct Program {
     pub statements: Vec<Stmt>,

@@ -4,6 +4,7 @@ mod lexer;
 mod operators;
 mod parser;
 mod program;
+mod runtime;
 
 use lexer::Lexer;
 use parser::Parser;
