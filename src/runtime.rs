@@ -17,7 +17,7 @@ pub enum Value {
     List(Vec<Value>),
     Record(HashMap<String, Value>),
     Function(Function),
-    BuiltinFunction(fn(Vec<Value>) -> Value),
+    BuiltinFunction(fn(Vec<Value>) -> Result<Value, RuntimeError>),
 }
 
 #[derive(Clone, Debug)]

@@ -1,135 +1,144 @@
 use std::fs::read_to_string;
-
 use std::{collections::HashMap, env, io};
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;
-use crate::runtime::{Env, Value};
+use crate::runtime::{Env, RuntimeError, Value};
 
-pub fn conv_module() -> Value {
+pub fn conv_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("float".to_string(), Value::BuiltinFunction(float));
     map.insert("int".to_string(), Value::BuiltinFunction(int));
     map.insert("string".to_string(), Value::BuiltinFunction(string));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn core_module() -> Value {
+pub fn core_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("import".to_string(), Value::BuiltinFunction(import));
     map.insert("len".to_string(), Value::BuiltinFunction(len));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn env_module() -> Value {
+pub fn env_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("args".to_string(), Value::BuiltinFunction(args));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn http_module() -> Value {
+pub fn http_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("get".to_string(), Value::BuiltinFunction(get));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn io_module() -> Value {
+pub fn io_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("input".to_string(), Value::BuiltinFunction(input));
     map.insert("print".to_string(), Value::BuiltinFunction(print));
     map.insert("println".to_string(), Value::BuiltinFunction(println));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn json_module() -> Value {
+pub fn json_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("parse".to_string(), Value::BuiltinFunction(parse));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn lists_module() -> Value {
+pub fn lists_module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("append".to_string(), Value::BuiltinFunction(append));
     map.insert("len".to_string(), Value::BuiltinFunction(len));
 
-    Value::Record(map)
+    Ok(Value::Record(map))
 }
 
-pub fn append(mut args: Vec<Value>) -> Value {
+pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
     if args.len() != 2 {
-        panic!("append expects 2 arguments")
+        return Err(RuntimeError {
+            message: "append expects 2 arguments".to_string(),
+        });
     }
 
-    let value = args.pop().expect("msg");
+    let value = args.pop().ok_or(RuntimeError {
+        message: "append expects 2 arguments".to_string(),
+    })?;
 
     match args.pop() {
         Some(Value::List(mut list)) => {
             list.push(value);
 
-            Value::List(list)
+            Ok(Value::List(list))
         }
-        _ => panic!(""),
+        _ => Err(RuntimeError {
+            message: "append expects a list as first argument".to_string(),
+        }),
     }
 }
 
-pub fn args(_: Vec<Value>) -> Value {
+pub fn args(_: Vec<Value>) -> Result<Value, RuntimeError> {
     let args: Vec<String> = env::args().collect();
     let values = args.iter().map(|a| Value::String(a.to_owned())).collect();
 
-    Value::List(values)
+    Ok(Value::List(values))
 }
 
-pub fn float(args: Vec<Value>) -> Value {
+pub fn float(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
-        Value::String(s) => Value::Float(
-            s.trim_ascii()
-                .parse()
-                .expect("float expects a valid number string"),
-        ),
-        _ => panic!("float expects a string"),
+        Value::String(s) => Ok(Value::Float(s.trim_ascii().parse().map_err(|_| {
+            RuntimeError {
+                message: "float expects a valid number string".to_string(),
+            }
+        })?)),
+        _ => Err(RuntimeError {
+            message: "float expects a string".to_string(),
+        }),
     }
 }
 
-pub fn get(args: Vec<Value>) -> Value {
+pub fn get(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
         Value::String(s) => {
             let response = reqwest::blocking::get(s);
 
             match response {
                 Ok(reponse) => match reponse.text() {
-                    Ok(text) => Value::Record(HashMap::from([
+                    Ok(text) => Ok(Value::Record(HashMap::from([
                         ("error".to_string(), Value::Bool(false)),
                         ("value".to_string(), Value::String(text)),
-                    ])),
-                    Err(e) => Value::Record(HashMap::from([
+                    ]))),
+                    Err(e) => Ok(Value::Record(HashMap::from([
                         ("error".to_string(), Value::Bool(true)),
                         ("value".to_string(), Value::String(e.to_string())),
-                    ])),
+                    ]))),
                 },
-                Err(e) => Value::Record(HashMap::from([
+                Err(e) => Ok(Value::Record(HashMap::from([
                     ("error".to_string(), Value::Bool(true)),
                     ("value".to_string(), Value::String(e.to_string())),
-                ])),
+                ]))),
             }
         }
-        _ => panic!("get expects a string argument"),
+        _ => Err(RuntimeError {
+            message: "get expects a string argument".to_string(),
+        }),
     }
 }
 
-pub fn import(args: Vec<Value>) -> Value {
+pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
         Value::String(s) => match s.as_str() {
             "conv" => conv_module(),
@@ -141,78 +150,93 @@ pub fn import(args: Vec<Value>) -> Value {
             "lists" => lists_module(),
 
             _ => {
-                let source = read_to_string(s).expect("import: could not read source file");
+                let source = read_to_string(s).map_err(|_| RuntimeError {
+                    message: "import: could not read source file".to_string(),
+                })?;
 
                 let mut lexer = Lexer::new(&source);
-                let tokens = lexer.tokenize().expect("import: could not tokenize source");
+                let tokens = lexer.tokenize().map_err(|_| RuntimeError {
+                    message: "import: could not tokenize source".to_string(),
+                })?;
 
                 let mut parser = Parser { tokens, pos: 0 };
-                let program = parser
-                    .parse_program()
-                    .expect("import: could not parse program");
+                let program = parser.parse_program().map_err(|_| RuntimeError {
+                    message: "import: could not parse program".to_string(),
+                })?;
 
                 let mut env = Env::new();
 
                 env.prelude();
 
                 for stmt in &program.statements {
-                    stmt.exec(&mut env)
-                        .expect("import: could not import module");
+                    stmt.exec(&mut env).map_err(|_| RuntimeError {
+                        message: "import: could not tokenize source".to_string(),
+                    })?;
                 }
 
-                Value::Record(env.vars)
+                Ok(Value::Record(env.vars))
             }
         },
 
-        _ => panic!("import expects a string argument"),
+        _ => Err(RuntimeError {
+            message: "import expects a string argument".to_string(),
+        }),
     }
 }
 
-pub fn input(_: Vec<Value>) -> Value {
+pub fn input(_: Vec<Value>) -> Result<Value, RuntimeError> {
     let mut buf: String = String::new();
-    io::stdin()
-        .read_line(&mut buf)
-        .expect("input expects stdin to work");
+    io::stdin().read_line(&mut buf).map_err(|_| RuntimeError {
+        message: "input expects stdin to work".to_string(),
+    })?;
 
-    Value::String(buf.trim_end_matches(['\n', '\r']).to_string())
+    Ok(Value::String(
+        buf.trim_end_matches(['\n', '\r']).to_string(),
+    ))
 }
 
-pub fn int(args: Vec<Value>) -> Value {
+pub fn int(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
-        Value::String(s) => Value::Int(
-            s.trim_ascii()
-                .parse()
-                .expect("int expects a valid number string"),
-        ),
-        _ => panic!("int expects a string"),
+        Value::String(s) => Ok(Value::Int(s.trim_ascii().parse().map_err(|_| {
+            RuntimeError {
+                message: "int expects a valid number string".to_string(),
+            }
+        })?)),
+        _ => Err(RuntimeError {
+            message: "int expects a string argument".to_string(),
+        }),
     }
 }
 
-pub fn parse(args: Vec<Value>) -> Value {
+pub fn parse(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
         Value::String(s) => match serde_json::from_str(s) {
-            Ok(parsed_json) => Value::Record(HashMap::from([
+            Ok(parsed_json) => Ok(Value::Record(HashMap::from([
                 ("error".to_string(), Value::Bool(false)),
                 ("value".to_string(), json_to_value(parsed_json)),
-            ])),
-            Err(e) => Value::Record(HashMap::from([
+            ]))),
+            Err(e) => Ok(Value::Record(HashMap::from([
                 ("error".to_string(), Value::Bool(true)),
                 ("value".to_string(), Value::String(e.to_string())),
-            ])),
+            ]))),
         },
-        _ => panic!("json expects a string argument"),
+        _ => Err(RuntimeError {
+            message: "json expects a string argument".to_string(),
+        }),
     }
 }
 
-pub fn len(args: Vec<Value>) -> Value {
+pub fn len(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
-        Value::List(v) => Value::Int(v.len() as i64),
-        Value::String(s) => Value::Int(s.len() as i64),
-        _ => panic!("len() unsupported type"),
+        Value::List(v) => Ok(Value::Int(v.len() as i64)),
+        Value::String(s) => Ok(Value::Int(s.len() as i64)),
+        _ => Err(RuntimeError {
+            message: "len(): unsuported type".to_string(),
+        }),
     }
 }
 
-pub fn print(args: Vec<Value>) -> Value {
+pub fn print(args: Vec<Value>) -> Result<Value, RuntimeError> {
     for a in args {
         match a {
             Value::Int(n) => print!("{}", n),
@@ -227,24 +251,26 @@ pub fn print(args: Vec<Value>) -> Value {
         }
     }
 
-    Value::Bool(true)
+    Ok(Value::Bool(true))
 }
 
-pub fn println(args: Vec<Value>) -> Value {
-    print(args);
+pub fn println(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    print(args)?;
     println!();
 
-    Value::Bool(true)
+    Ok(Value::Bool(true))
 }
 
-pub fn string(args: Vec<Value>) -> Value {
+pub fn string(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
-        Value::Int(n) => Value::String(n.to_string()),
-        Value::Float(n) => Value::String(n.to_string()),
-        Value::Bool(b) => Value::String(b.to_string()),
-        Value::List(l) => Value::String(format!("{:?}", l)),
-        Value::Record(r) => Value::String(format!("{:?}", r)),
-        _ => panic!("unable to convert type to string"),
+        Value::Int(n) => Ok(Value::String(n.to_string())),
+        Value::Float(n) => Ok(Value::String(n.to_string())),
+        Value::Bool(b) => Ok(Value::String(b.to_string())),
+        Value::List(l) => Ok(Value::String(format!("{:?}", l))),
+        Value::Record(r) => Ok(Value::String(format!("{:?}", r))),
+        _ => Err(RuntimeError {
+            message: "unable to convert type to string".to_string(),
+        }),
     }
 }
 
@@ -253,13 +279,13 @@ fn json_to_value(v: serde_json::Value) -> Value {
         serde_json::Value::Bool(b) => Value::Bool(b),
         serde_json::Value::Number(n) => {
             if n.is_i64() {
-                Value::Int(n.as_i64().expect("expected i64 format"))
+                Value::Int(n.as_i64().unwrap_or_default())
             } else if n.is_u64() {
-                Value::Int(n.as_i64().expect("expected u64 format"))
+                Value::Int(n.as_i64().unwrap_or_default())
             } else if n.is_f64() {
-                Value::Float(n.as_f64().expect("expected f64 format"))
+                Value::Float(n.as_f64().unwrap_or_default())
             } else {
-                panic!("unexpected number format")
+                Value::Null
             }
         }
         serde_json::Value::String(s) => Value::String(s),
