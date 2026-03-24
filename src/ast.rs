@@ -259,7 +259,7 @@ impl Expr {
                         Ok(result)
                     }
 
-                    Value::BuiltinFunction(f) => Ok(f(&values?)),
+                    Value::BuiltinFunction(f) => Ok(f(values?)),
 
                     _ => Err(RuntimeError {
                         message: format!("uncallable"),

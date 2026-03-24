@@ -68,31 +68,31 @@ pub fn lists_module() -> Value {
     Value::Record(map)
 }
 
-pub fn append(args: &[Value]) -> Value {
-    match &args[0] {
-        Value::List(v) => {
-            if args.len() != 2 {
-                panic!("append expects 2 arguments")
-            }
+pub fn append(mut args: Vec<Value>) -> Value {
+    if args.len() != 2 {
+        panic!("append expects 2 arguments")
+    }
 
-            let mut new_list = v.clone();
+    let value = args.pop().expect("msg");
 
-            new_list.push(args[1].clone());
+    match args.pop() {
+        Some(Value::List(mut list)) => {
+            list.push(value);
 
-            Value::List(new_list)
+            Value::List(list)
         }
-        _ => panic!("append expects a list"),
+        _ => panic!(""),
     }
 }
 
-pub fn args(_: &[Value]) -> Value {
+pub fn args(_: Vec<Value>) -> Value {
     let args: Vec<String> = env::args().collect();
     let values = args.iter().map(|a| Value::String(a.to_owned())).collect();
 
     Value::List(values)
 }
 
-pub fn float(args: &[Value]) -> Value {
+pub fn float(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::String(s) => Value::Float(
             s.trim_ascii()
@@ -103,7 +103,7 @@ pub fn float(args: &[Value]) -> Value {
     }
 }
 
-pub fn get(args: &[Value]) -> Value {
+pub fn get(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::String(s) => {
             let response = reqwest::blocking::get(s);
@@ -129,7 +129,7 @@ pub fn get(args: &[Value]) -> Value {
     }
 }
 
-pub fn import(args: &[Value]) -> Value {
+pub fn import(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::String(s) => match s.as_str() {
             "conv" => conv_module(),
@@ -168,7 +168,7 @@ pub fn import(args: &[Value]) -> Value {
     }
 }
 
-pub fn input(_: &[Value]) -> Value {
+pub fn input(_: Vec<Value>) -> Value {
     let mut buf: String = String::new();
     io::stdin()
         .read_line(&mut buf)
@@ -177,7 +177,7 @@ pub fn input(_: &[Value]) -> Value {
     Value::String(buf.trim_end_matches(['\n', '\r']).to_string())
 }
 
-pub fn int(args: &[Value]) -> Value {
+pub fn int(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::String(s) => Value::Int(
             s.trim_ascii()
@@ -188,7 +188,7 @@ pub fn int(args: &[Value]) -> Value {
     }
 }
 
-pub fn parse(args: &[Value]) -> Value {
+pub fn parse(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::String(s) => match serde_json::from_str(s) {
             Ok(parsed_json) => Value::Record(HashMap::from([
@@ -204,7 +204,7 @@ pub fn parse(args: &[Value]) -> Value {
     }
 }
 
-pub fn len(args: &[Value]) -> Value {
+pub fn len(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::List(v) => Value::Int(v.len() as i64),
         Value::String(s) => Value::Int(s.len() as i64),
@@ -212,7 +212,7 @@ pub fn len(args: &[Value]) -> Value {
     }
 }
 
-pub fn print(args: &[Value]) -> Value {
+pub fn print(args: Vec<Value>) -> Value {
     for a in args {
         match a {
             Value::Int(n) => print!("{}", n),
@@ -230,14 +230,14 @@ pub fn print(args: &[Value]) -> Value {
     Value::Bool(true)
 }
 
-pub fn println(args: &[Value]) -> Value {
+pub fn println(args: Vec<Value>) -> Value {
     print(args);
     println!();
 
     Value::Bool(true)
 }
 
-pub fn string(args: &[Value]) -> Value {
+pub fn string(args: Vec<Value>) -> Value {
     match &args[0] {
         Value::Int(n) => Value::String(n.to_string()),
         Value::Float(n) => Value::String(n.to_string()),
