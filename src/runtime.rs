@@ -62,6 +62,11 @@ impl Env {
 
     pub fn prelude(&mut self) {
         self.set(
+            "append".to_string(),
+            Value::BuiltinFunction(builtin::append),
+        );
+
+        self.set(
             "import".to_string(),
             Value::BuiltinFunction(builtin::import),
         );
