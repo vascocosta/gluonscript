@@ -451,6 +451,8 @@ impl Parser {
             Some(Token::Int(n)) => Ok(Expr::Int(n)),
             Some(Token::Float(n)) => Ok(Expr::Float(n)),
             Some(Token::String(s)) => Ok(Expr::String(s)),
+            Some(Token::True) => Ok(Expr::Bool(true)),
+            Some(Token::False) => Ok(Expr::Bool(false)),
             Some(Token::Ident(name)) => {
                 // check if this is a function call
                 if matches!(self.peek(), Some(Token::LParen)) {

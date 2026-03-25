@@ -8,6 +8,7 @@ pub enum Expr {
     Int(i64),
     Float(f64),
     String(String),
+    Bool(bool),
     Variable(String),
     Binary {
         left: Box<Expr>,
@@ -40,6 +41,7 @@ impl Expr {
             Expr::Int(n) => Ok(Value::Int(*n)),
             Expr::Float(n) => Ok(Value::Float(*n)),
             Expr::String(s) => Ok(Value::String(s.to_owned())),
+            Expr::Bool(b) => Ok(Value::Bool(*b)),
 
             Expr::Variable(name) => Ok(env.get_vars(name).ok_or(RuntimeError {
                 message: format!("undefined variable: {}", name),
