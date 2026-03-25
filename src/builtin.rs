@@ -84,6 +84,14 @@ pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
 
             Ok(Value::List(list))
         }
+
+        Some(Value::String(s1)) => match value {
+            Value::String(s2) => Ok(Value::String(format!("{}{}", s1, s2))),
+            _ => Err(RuntimeError {
+                message: "append expects a string when appending to a string".to_string(),
+            }),
+        },
+
         _ => Err(RuntimeError {
             message: "append expects a list as first argument".to_string(),
         }),
