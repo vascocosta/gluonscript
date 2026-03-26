@@ -67,6 +67,15 @@ pub fn lists_module() -> Result<Value, RuntimeError> {
     Ok(Value::Record(map))
 }
 
+pub fn strings_module() -> Result<Value, RuntimeError> {
+    let mut map = HashMap::new();
+
+    map.insert("lower".to_string(), Value::BuiltinFunction(lower));
+    map.insert("upper".to_string(), Value::BuiltinFunction(upper));
+
+    Ok(Value::Record(map))
+}
+
 pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
     if args.len() != 2 {
         return Err(RuntimeError {
@@ -156,6 +165,7 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
             "io" => io_module(),
             "json" => json_module(),
             "lists" => lists_module(),
+            "strings" => strings_module(),
 
             _ => {
                 let source = read_to_string(s).map_err(|_| RuntimeError {
@@ -278,6 +288,24 @@ pub fn string(args: Vec<Value>) -> Result<Value, RuntimeError> {
         Value::Record(r) => Ok(Value::String(format!("{:?}", r))),
         _ => Err(RuntimeError {
             message: "unable to convert type to string".to_string(),
+        }),
+    }
+}
+
+pub fn lower(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    match args.first() {
+        Some(Value::String(s)) => Ok(Value::String(s.to_lowercase())),
+        _ => Err(RuntimeError {
+            message: "lower expects a string argument".to_string(),
+        }),
+    }
+}
+
+pub fn upper(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    match args.first() {
+        Some(Value::String(s)) => Ok(Value::String(s.to_uppercase())),
+        _ => Err(RuntimeError {
+            message: "upper expects a string argument".to_string(),
         }),
     }
 }
