@@ -39,6 +39,23 @@ pub enum Value {
     BuiltinFunction(fn(Vec<Value>) -> Result<Value, RuntimeError>),
 }
 
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Value::Null => write!(f, ""),
+            Value::Int(i) => write!(f, "{i}"),
+            Value::Float(fl) => write!(f, "{}", fl),
+            Value::String(s) => write!(f, "{s}"),
+            Value::Bool(b) => write!(f, "{b}"),
+            Value::List(v) => {
+                let values: Vec<String> = v.iter().map(|v| format!("{}", v)).collect();
+                write!(f, "{}", values.join(", "))
+            }
+            _ => todo!(),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Function {
     pub params: Vec<String>,
