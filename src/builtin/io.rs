@@ -14,9 +14,9 @@ pub fn module() -> Result<Value, RuntimeError> {
 
 pub fn input(_: Vec<Value>) -> Result<Value, RuntimeError> {
     let mut buf: String = String::new();
-    io::stdin().read_line(&mut buf).map_err(|_| RuntimeError {
-        message: "input expects stdin to work".to_string(),
-    })?;
+    io::stdin()
+        .read_line(&mut buf)
+        .map_err(|_| RuntimeError::Message("input: could not read from stdin"))?;
 
     Ok(Value::String(
         buf.trim_end_matches(['\n', '\r']).to_string(),

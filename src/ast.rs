@@ -43,9 +43,9 @@ impl Expr {
             Expr::String(s) => Ok(Value::String(s.to_owned())),
             Expr::Bool(b) => Ok(Value::Bool(*b)),
 
-            Expr::Variable(name) => Ok(env.get_vars(name).ok_or(RuntimeError {
-                message: format!("undefined variable: {}", name),
-            })?),
+            Expr::Variable(name) => Ok(env.get_vars(name).ok_or(RuntimeError::RichMessage(
+                format!("undefined variable: {}", name),
+            ))?),
 
             Expr::Binary { left, op, right } => {
                 let l = left.eval(env)?;
@@ -226,9 +226,7 @@ impl Expr {
                     // Operator::And
                     (Value::Bool(a), Value::Bool(b), Operator::And) => Ok(Value::Bool(a && b)),
 
-                    _ => Err(RuntimeError {
-                        message: "type error".to_string(),
-                    }),
+                    _ => Err(RuntimeError::Message("unsupported operation")),
                 }
             }
 
@@ -263,9 +261,7 @@ impl Expr {
 
                     Value::BuiltinFunction(f) => f(values?),
 
-                    _ => Err(RuntimeError {
-                        message: format!("uncallable"),
-                    }),
+                    _ => Err(RuntimeError::Message("type is not callable")),
                 }
             }
 
@@ -281,15 +277,12 @@ impl Expr {
                 let idx = index.eval(env)?;
 
                 match (list, idx) {
-                    (Value::List(v), Value::Int(i)) => {
-                        Ok(v.get(i as usize).cloned().ok_or(RuntimeError {
-                            message: "index out of bounds".to_string(),
-                        })?)
-                    }
+                    (Value::List(v), Value::Int(i)) => Ok(v
+                        .get(i as usize)
+                        .cloned()
+                        .ok_or(RuntimeError::Message("index out of bounds"))?),
 
-                    _ => Err(RuntimeError {
-                        message: "invalid indexing".to_string(),
-                    }),
+                    _ => Err(RuntimeError::Message("type is not indexable")),
                 }
             }
 
@@ -307,12 +300,19 @@ impl Expr {
                 let record = target.eval(env)?;
 
                 match record {
-                    Value::Record(map) => Ok(map.get(name).cloned().ok_or(RuntimeError {
-                        message: format!("unknown property: {}", name),
-                    })?),
-                    _ => Err(RuntimeError {
-                        message: format!("cannot access: {}, {:?} is not a record", name, target),
-                    }),
+                    Value::Record(map) => {
+                        Ok(map
+                            .get(name)
+                            .cloned()
+                            .ok_or(RuntimeError::RichMessage(format!(
+                                "unknown property: {}",
+                                name
+                            )))?)
+                    }
+                    _ => Err(RuntimeError::RichMessage(format!(
+                        "cannot access: {}, {:?} is not a record",
+                        name, target
+                    ))),
                 }
             }
 
@@ -417,9 +417,10 @@ impl Stmt {
                         }
                     }
 
-                    _ => {
-                        return Err(RuntimeError {
-                            message: "for loop expects a list".to_string(),
+                    other => {
+                        return Err(RuntimeError::TypeError {
+                            expected: "list",
+                            got: format!("{:?}", other),
                         });
                     }
                 }
@@ -446,9 +447,10 @@ impl Stmt {
 
                         Value::Bool(false) => break,
 
-                        _ => {
-                            return Err(RuntimeError {
-                                message: "while condition must be bool".to_string(),
+                        other => {
+                            return Err(RuntimeError::TypeError {
+                                expected: "bool",
+                                got: format!("{:?}", other),
                             });
                         }
                     }

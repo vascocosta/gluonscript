@@ -13,13 +13,15 @@ use crate::runtime::{Env, RuntimeError, Value};
 
 pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
     if args.len() != 2 {
-        return Err(RuntimeError {
-            message: "append expects 2 arguments".to_string(),
+        return Err(RuntimeError::Arity {
+            expected: 2,
+            got: args.len(),
         });
     }
 
-    let value = args.pop().ok_or(RuntimeError {
-        message: "append expects 2 arguments".to_string(),
+    let value = args.pop().ok_or(RuntimeError::Arity {
+        expected: 2,
+        got: args.len(),
     })?;
 
     match args.pop() {
@@ -31,13 +33,15 @@ pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
 
         Some(Value::String(s1)) => match value {
             Value::String(s2) => Ok(Value::String(format!("{}{}", s1, s2))),
-            _ => Err(RuntimeError {
-                message: "append expects a string when appending to a string".to_string(),
+            other => Err(RuntimeError::TypeError {
+                expected: "string",
+                got: format!("{:?}", other),
             }),
         },
 
-        _ => Err(RuntimeError {
-            message: "append expects a list as first argument".to_string(),
+        other => Err(RuntimeError::TypeError {
+            expected: "list",
+            got: format!("{:?}", other),
         }),
     }
 }
@@ -53,36 +57,35 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
             "strings" => strings::module(),
 
             _ => {
-                let source = fs::read_to_string(s).map_err(|_| RuntimeError {
-                    message: "import: could not read source file".to_string(),
-                })?;
+                let source = fs::read_to_string(s)
+                    .map_err(|_| RuntimeError::Message("import: could not read source file"))?;
 
                 let mut lexer = Lexer::new(&source);
-                let tokens = lexer.tokenize().map_err(|_| RuntimeError {
-                    message: "import: could not tokenize source".to_string(),
-                })?;
+                let tokens = lexer
+                    .tokenize()
+                    .map_err(|_| RuntimeError::Message("import: could not tokenize source"))?;
 
                 let mut parser = Parser { tokens, pos: 0 };
-                let program = parser.parse_program().map_err(|_| RuntimeError {
-                    message: "import: could not parse program".to_string(),
-                })?;
+                let program = parser
+                    .parse_program()
+                    .map_err(|_| RuntimeError::Message("import: could not parse program"))?;
 
                 let mut env = Env::new();
 
                 env.prelude();
 
                 for stmt in &program.statements {
-                    stmt.exec(&mut env).map_err(|_| RuntimeError {
-                        message: "import: could not tokenize source".to_string(),
-                    })?;
+                    stmt.exec(&mut env)
+                        .map_err(|_| RuntimeError::Message("import: could not tokenize source"))?;
                 }
 
                 Ok(Value::Record(env.vars))
             }
         },
 
-        _ => Err(RuntimeError {
-            message: "import expects a string argument".to_string(),
+        other => Err(RuntimeError::TypeError {
+            expected: "string",
+            got: format!("{:?}", other),
         }),
     }
 }
@@ -91,8 +94,6 @@ pub fn len(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match &args[0] {
         Value::List(v) => Ok(Value::Int(v.len() as i64)),
         Value::String(s) => Ok(Value::Int(s.len() as i64)),
-        _ => Err(RuntimeError {
-            message: "len(): unsuported type".to_string(),
-        }),
+        _ => Err(RuntimeError::Message("len: unsuported type")),
     }
 }

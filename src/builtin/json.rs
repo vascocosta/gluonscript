@@ -22,8 +22,9 @@ pub fn parse(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 ("value".to_string(), Value::String(e.to_string())),
             ]))),
         },
-        _ => Err(RuntimeError {
-            message: "json expects a string argument".to_string(),
+        other => Err(RuntimeError::TypeError {
+            expected: "string",
+            got: format!("{:?}", other),
         }),
     }
 }

@@ -48,7 +48,7 @@ fn main() {
     };
 
     if let Err(e) = program.run() {
-        eprintln!("Error running program: {}", e.message);
+        eprintln!("Error running program: {}", e);
         process::exit(1);
     }
 }

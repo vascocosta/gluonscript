@@ -1,10 +1,29 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use crate::{ast::Stmt, builtin};
 
-#[derive(Debug)]
-pub struct RuntimeError {
-    pub message: String,
+pub enum RuntimeError {
+    Arity { expected: usize, got: usize },
+    Message(&'static str),
+    RichMessage(String),
+    TypeError { expected: &'static str, got: String },
+}
+
+impl Display for RuntimeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RuntimeError::Arity { expected, got } => {
+                writeln!(f, "arity error: expected: {} instead of: {}", expected, got)
+            }
+
+            RuntimeError::Message(m) => writeln!(f, "{m}"),
+            RuntimeError::RichMessage(m) => writeln!(f, "{m}"),
+
+            RuntimeError::TypeError { expected, got } => {
+                writeln!(f, "type error: expected: {} instead of {}", expected, got)
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

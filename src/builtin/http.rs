@@ -32,8 +32,9 @@ pub fn get(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 ]))),
             }
         }
-        _ => Err(RuntimeError {
-            message: "get expects a string argument".to_string(),
+        other => Err(RuntimeError::TypeError {
+            expected: "string",
+            got: format!("{:?}", other),
         }),
     }
 }

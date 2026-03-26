@@ -14,8 +14,9 @@ pub fn module() -> Result<Value, RuntimeError> {
 pub fn lower(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
         Some(Value::String(s)) => Ok(Value::String(s.to_lowercase())),
-        _ => Err(RuntimeError {
-            message: "lower expects a string argument".to_string(),
+        other => Err(RuntimeError::TypeError {
+            expected: "string",
+            got: format!("{:?}", other),
         }),
     }
 }
@@ -23,8 +24,9 @@ pub fn lower(args: Vec<Value>) -> Result<Value, RuntimeError> {
 pub fn upper(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
         Some(Value::String(s)) => Ok(Value::String(s.to_uppercase())),
-        _ => Err(RuntimeError {
-            message: "upper expects a string argument".to_string(),
+        other => Err(RuntimeError::TypeError {
+            expected: "string",
+            got: format!("{:?}", other),
         }),
     }
 }
