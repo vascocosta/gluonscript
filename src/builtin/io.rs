@@ -1,0 +1,49 @@
+use std::{collections::HashMap, io};
+
+use crate::runtime::{RuntimeError, Value};
+
+pub fn module() -> Result<Value, RuntimeError> {
+    let mut map = HashMap::new();
+
+    map.insert("input".to_string(), Value::BuiltinFunction(input));
+    map.insert("print".to_string(), Value::BuiltinFunction(print));
+    map.insert("println".to_string(), Value::BuiltinFunction(println));
+
+    Ok(Value::Record(map))
+}
+
+pub fn input(_: Vec<Value>) -> Result<Value, RuntimeError> {
+    let mut buf: String = String::new();
+    io::stdin().read_line(&mut buf).map_err(|_| RuntimeError {
+        message: "input expects stdin to work".to_string(),
+    })?;
+
+    Ok(Value::String(
+        buf.trim_end_matches(['\n', '\r']).to_string(),
+    ))
+}
+
+pub fn print(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    for a in args {
+        match a {
+            Value::Int(n) => print!("{}", n),
+            Value::Float(n) => print!("{}", n),
+            Value::Bool(b) => print!("{}", b),
+            Value::String(s) => print!("{}", s),
+            Value::List(l) => print!("{:?}", l),
+            Value::Record(o) => print!("{:?}", o),
+            Value::Null => print!("Null"),
+            Value::Function(f) => print!("{:?}", f),
+            Value::BuiltinFunction(f) => print!("{:?}", f),
+        }
+    }
+
+    Ok(Value::Bool(true))
+}
+
+pub fn println(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    print(args)?;
+    println!();
+
+    Ok(Value::Bool(true))
+}
