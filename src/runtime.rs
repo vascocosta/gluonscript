@@ -13,14 +13,14 @@ impl Display for RuntimeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             RuntimeError::Arity { expected, got } => {
-                writeln!(f, "arity error: expected: {} instead of: {}", expected, got)
+                write!(f, "arity error: expected: {} instead of: {}", expected, got)
             }
 
-            RuntimeError::Message(m) => writeln!(f, "{m}"),
-            RuntimeError::RichMessage(m) => writeln!(f, "{m}"),
+            RuntimeError::Message(m) => write!(f, "{m}"),
+            RuntimeError::RichMessage(m) => write!(f, "{m}"),
 
             RuntimeError::TypeError { expected, got } => {
-                writeln!(f, "type error: expected: {} instead of {}", expected, got)
+                write!(f, "type error: expected: {} instead of {}", expected, got)
             }
         }
     }
