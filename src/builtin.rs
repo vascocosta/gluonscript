@@ -115,12 +115,22 @@ pub fn slice(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 (Value::Int(start), Value::Int(end)) => {
                     Ok(Value::List(l[*start as usize..*end as usize].to_vec()))
                 }
+
                 other => Err(RuntimeError::TypeError {
                     expected: "int, int",
                     got: format!("{}, {}", other.0, other.1),
                 }),
             }
         }
-        _ => todo!(),
+
+        Some(other) => Err(RuntimeError::TypeError {
+            expected: "list",
+            got: format!("{}", other),
+        }),
+
+        _ => Err(RuntimeError::Arity {
+            expected: 3,
+            got: 0,
+        }),
     }
 }
