@@ -23,7 +23,9 @@ A dynamically typed language with the bare minimum features to be enjoyable and 
 
 ### Example 1
 
-```Rust
+```Python
+io = import("io")
+
 fn generic_operation(a, b, operation) {
     operation(a, b)
 }
@@ -37,7 +39,7 @@ operations = [sum, sub, mul, div]
 
 for operation in operations {
     result = generic_operation(4, 2, operation)
-    println(result)
+    io.println(result)
 }
 ```
 
@@ -51,7 +53,9 @@ Output:
 
 ### Example 2
 
-```Rust
+```Python
+io = import("io")
+
 fn even_odd(numbers) {
     even = []
     odd = []
@@ -76,17 +80,20 @@ fn even_odd(numbers) {
 
 numbers = [1, 2, 3, 4, 5, 6]
 
-println(even_odd(numbers))
+io.println(even_odd(numbers))
 ```
 
 ```
 Output:
-[List([Int(2), Int(4), Int(6)]), List([Int(1), Int(3), Int(5)])]
+[[2, 4, 6], [1, 3, 5]]
 ```
 
 ### Example 3
 
-```Rust
+```Python
+conv = import("conv")
+io = import("io")
+
 # Define a function that "updates" a user (records are immutable).
 fn birthday(user) {
     return {
@@ -98,51 +105,62 @@ fn birthday(user) {
 # Create a record.
 user = {
     name: "Vasco",
-    age: 25
+    age: 44
 }
 
-println("User:")
-println("Name: " + user.name)
-println("Age: " + string(user.age))
+io.println("User:")
+io.println("Name: " + user.name)
+io.println("Age: " + conv.string(user.age))
 
 # Create a new updated record.
 updated = birthday(user)
 
-println()
-println("After birthday:")
-println("Name: " + updated.name)
-println("Age: " + string(updated.age))
+io.println()
+io.println("After birthday:")
+io.println("Name: " + updated.name)
+io.println("Age: " + conv.string(updated.age))
 ```
 
 ```
 User:
 Name: Vasco
-Age: 25
+Age: 44
 
 After birthday:
 Name: Vasco
-Age: 26
+Age: 45
 ```
 
 ### Example 4
 
-```Rust
+```Python
+env = import("env")
+http = import("http")
+io = import("io")
+strings = import("strings")
+
 fn get_weather(location) {
     # Get may fail so it returns { "error": Bool, "value": Value }.
     # The last expression is returned even without the return keyword.
     # A function returns an expression that evaluates to a value and is returned.
-    get("https://wttr.in/" + location + "?format=3")
+    http.get("https://wttr.in/" + location + "?format=3")
 }
 
 fn main() {
-    args = args()
+    args = env.args()
 
-    if len(args) != 3 {
-        println("Usage: weather.gs <location>")
+    if len(args) < 3 {
+        io.println("Usage: weather.gs <location>")
         return 1
     }
 
-    result = get_weather(args[2])
+    # The function pipe |> operator makes data manipulation easy to reason.
+    location =
+        args # List of all arguments passed to the program.
+        |> slice(2, len(args)) # Slice the list to exclude unwanted elements.
+        |> strings.join(" ") # Join elements of args to form a location string.
+
+    result = get_weather(location)
 
     # By convention functions that might fail return { "error": Bool, "value": Value }.
     # Checking this record for an error is a common pattern in gluonscript.
@@ -150,9 +168,9 @@ fn main() {
     # Otherwise if error is false, value shows whatever value the function returns.
     # This is similar in spirit to what languages like Go or Rust do.
     if result.error {
-        println("Could not fetch weather: " + result.value)
+        io.println("Could not fetch weather: " + result.value)
     } else {
-        print(result.value)
+        io.print(result.value)
     }
 }
 
