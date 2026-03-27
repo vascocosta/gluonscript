@@ -48,6 +48,26 @@ impl Expr {
             ))?),
 
             Expr::Binary { left, op, right } => {
+                if let Operator::Pipe = op {
+                    let l = left.eval(env)?;
+
+                    match &**right {
+                        Expr::Call { callee, args } => {
+                            let mut values = vec![l];
+
+                            for arg in args {
+                                values.push(arg.eval(env)?);
+                            }
+
+                            let func_val = callee.eval(env)?;
+
+                            return func_val.call(values);
+                        }
+
+                        _ => return right.eval(env)?.call(vec![l]),
+                    }
+                }
+
                 let l = left.eval(env)?;
                 let r = right.eval(env)?;
 
@@ -231,38 +251,12 @@ impl Expr {
             }
 
             Expr::Call { callee, args } => {
-                let values: Result<Vec<Value>, RuntimeError> =
+                let args: Result<Vec<Value>, RuntimeError> =
                     args.iter().map(|a| a.eval(env)).collect();
 
                 let func_val = callee.eval(env)?;
 
-                match func_val {
-                    Value::Function(func) => {
-                        let mut local_env = func.env.child();
-
-                        for (param, value) in func.params.iter().zip(values?) {
-                            local_env.set(param.clone(), value);
-                        }
-
-                        let mut result = Value::Null;
-
-                        for stmt in &func.body {
-                            match stmt.exec(&mut local_env)? {
-                                ExecResult::Continue => {}
-                                ExecResult::Break => {}
-                                ExecResult::LoopContinue => {}
-                                ExecResult::Return(v) => return Ok(v),
-                                ExecResult::Value(v) => result = v,
-                            }
-                        }
-
-                        Ok(result)
-                    }
-
-                    Value::BuiltinFunction(f) => f(values?),
-
-                    _ => Err(RuntimeError::Message("type is not callable")),
-                }
+                func_val.call(args?)
             }
 
             Expr::ListLiteral(elements) => {

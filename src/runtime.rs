@@ -1,6 +1,9 @@
 use std::{collections::HashMap, fmt::Display};
 
-use crate::{ast::Stmt, builtin};
+use crate::{
+    ast::{ExecResult, Stmt},
+    builtin,
+};
 
 pub enum RuntimeError {
     Arity { expected: usize, got: usize },
@@ -37,6 +40,38 @@ pub enum Value {
     Record(HashMap<String, Value>),
     Function(Function),
     BuiltinFunction(fn(Vec<Value>) -> Result<Value, RuntimeError>),
+}
+
+impl Value {
+    pub fn call(&self, args: Vec<Value>) -> Result<Value, RuntimeError> {
+        match self {
+            Value::Function(func) => {
+                let mut local_env = func.env.child();
+
+                for (param, value) in func.params.iter().zip(args) {
+                    local_env.set(param.clone(), value);
+                }
+
+                let mut result = Value::Null;
+
+                for stmt in &func.body {
+                    match stmt.exec(&mut local_env)? {
+                        ExecResult::Continue => {}
+                        ExecResult::Break => {}
+                        ExecResult::LoopContinue => {}
+                        ExecResult::Return(v) => return Ok(v),
+                        ExecResult::Value(v) => result = v,
+                    }
+                }
+
+                Ok(result)
+            }
+
+            Value::BuiltinFunction(f) => f(args),
+
+            _ => Err(RuntimeError::Message("type is not callable")),
+        }
+    }
 }
 
 impl Display for Value {

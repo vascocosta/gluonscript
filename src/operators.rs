@@ -13,6 +13,7 @@ pub enum Operator {
     NotEqual,
     Or,
     And,
+    Pipe,
 }
 
 impl Operator {
@@ -23,6 +24,8 @@ impl Operator {
 
             Operator::EqualEqual => 3,
             Operator::NotEqual => 3,
+
+            Operator::Pipe => 3,
 
             Operator::Greater => 4,
             Operator::GreaterEqual => 4,

@@ -27,7 +27,7 @@ pub enum Token {
     EqualEqual,
     Not,
     NotEqual,
-    Pipe,
+    PipePipe,
     Ampersand,
     If,
     In,
@@ -49,6 +49,7 @@ pub enum Token {
     Continue,
     True,
     False,
+    Pipe,
 }
 
 pub struct Lexer {
@@ -188,6 +189,9 @@ impl Lexer {
                     self.consume();
 
                     if self.peek() == Some('|') {
+                        self.consume();
+                        tokens.push(Token::PipePipe);
+                    } else if self.peek() == Some('>') {
                         self.consume();
                         tokens.push(Token::Pipe);
                     } else {
