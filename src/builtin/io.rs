@@ -28,12 +28,12 @@ pub fn print(args: Vec<Value>) -> Result<Value, RuntimeError> {
         print!("{a}");
     }
 
-    Ok(Value::Bool(true))
+    Ok(Value::None)
 }
 
 pub fn println(args: Vec<Value>) -> Result<Value, RuntimeError> {
     print(args)?;
     println!();
 
-    Ok(Value::Bool(true))
+    Ok(Value::None)
 }
