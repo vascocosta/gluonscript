@@ -40,11 +40,11 @@ fn json_to_value(v: serde_json::Value) -> Value {
             } else if n.is_f64() {
                 Value::Float(n.as_f64().unwrap_or_default())
             } else {
-                Value::Null
+                Value::None
             }
         }
         serde_json::Value::String(s) => Value::String(s),
-        serde_json::Value::Null => Value::Null,
+        serde_json::Value::Null => Value::None,
         serde_json::Value::Array(arr) => Value::List(arr.into_iter().map(json_to_value).collect()),
         serde_json::Value::Object(map) => Value::Record(
             map.into_iter()

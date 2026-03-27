@@ -31,7 +31,7 @@ impl Display for RuntimeError {
 
 #[derive(Debug, Clone)]
 pub enum Value {
-    Null,
+    None,
     Int(i64),
     Float(f64),
     String(String),
@@ -52,7 +52,7 @@ impl Value {
                     local_env.set(param.clone(), value);
                 }
 
-                let mut result = Value::Null;
+                let mut result = Value::None;
 
                 for stmt in &func.body {
                     match stmt.exec(&mut local_env)? {
@@ -77,7 +77,7 @@ impl Value {
 impl Display for Value {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::Null => write!(fmt, ""),
+            Value::None => write!(fmt, "None"),
             Value::Int(i) => write!(fmt, "{i}"),
             Value::Float(f) => write!(fmt, "{}", f),
             Value::String(s) => write!(fmt, "{s}"),
