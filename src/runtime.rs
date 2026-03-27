@@ -110,6 +110,7 @@ impl Env {
         );
 
         self.set("len".to_string(), Value::BuiltinFunction(builtin::len));
+        self.set("slice".to_string(), Value::BuiltinFunction(builtin::slice));
     }
 
     pub fn set(&mut self, name: String, value: Value) {

@@ -97,3 +97,30 @@ pub fn len(args: Vec<Value>) -> Result<Value, RuntimeError> {
         _ => Err(RuntimeError::Message("len: unsuported type")),
     }
 }
+
+pub fn slice(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    match args.first() {
+        Some(Value::List(l)) => {
+            let start = args
+                .iter()
+                .nth(1)
+                .ok_or(RuntimeError::Message("no start provided"))?;
+
+            let end = args
+                .iter()
+                .nth(2)
+                .ok_or(RuntimeError::Message("no end provided"))?;
+
+            match (start, end) {
+                (Value::Int(start), Value::Int(end)) => {
+                    Ok(Value::List(l[*start as usize..*end as usize].to_vec()))
+                }
+                other => Err(RuntimeError::TypeError {
+                    expected: "int, int",
+                    got: format!("{}, {}", other.0, other.1),
+                }),
+            }
+        }
+        _ => todo!(),
+    }
+}
