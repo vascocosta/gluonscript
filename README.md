@@ -10,13 +10,13 @@ A dynamically typed language with the bare minimum features to be enjoyable and 
 * First-class functions
 * Lambdas
 * Closures
+* Function pipe operator
 * Easy collection iteration
 * Functions that might fail return { "error": Bool, "value": Value }
 * One single way to do things
 * Rich built-in std library
 * Balanced imperative/functional style
-* Ideal for new programmers
-* Ideal for experienced programmers
+* Ideal for new and experienced programmers
 * Implemented in Rust taking advantage of its ownership model (no GC)
 
 ## Examples
