@@ -40,18 +40,20 @@ pub enum Value {
 }
 
 impl Display for Value {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::Null => write!(f, ""),
-            Value::Int(i) => write!(f, "{i}"),
-            Value::Float(fl) => write!(f, "{}", fl),
-            Value::String(s) => write!(f, "{s}"),
-            Value::Bool(b) => write!(f, "{b}"),
+            Value::Null => write!(fmt, ""),
+            Value::Int(i) => write!(fmt, "{i}"),
+            Value::Float(f) => write!(fmt, "{}", f),
+            Value::String(s) => write!(fmt, "{s}"),
+            Value::Bool(b) => write!(fmt, "{b}"),
             Value::List(v) => {
                 let values: Vec<String> = v.iter().map(|v| format!("{}", v)).collect();
-                write!(f, "{}", values.join(", "))
+                write!(fmt, "[{}]", values.join(", "))
             }
-            _ => todo!(),
+            Value::Record(o) => write!(fmt, "{:?}", o),
+            Value::Function(f) => write!(fmt, "{:?}", f),
+            Value::BuiltinFunction(f) => write!(fmt, "{:?}", f),
         }
     }
 }

@@ -25,17 +25,7 @@ pub fn input(_: Vec<Value>) -> Result<Value, RuntimeError> {
 
 pub fn print(args: Vec<Value>) -> Result<Value, RuntimeError> {
     for a in args {
-        match a {
-            Value::Int(n) => print!("{}", n),
-            Value::Float(n) => print!("{}", n),
-            Value::Bool(b) => print!("{}", b),
-            Value::String(s) => print!("{}", s),
-            Value::List(l) => print!("{:?}", l),
-            Value::Record(o) => print!("{:?}", o),
-            Value::Null => print!("Null"),
-            Value::Function(f) => print!("{:?}", f),
-            Value::BuiltinFunction(f) => print!("{:?}", f),
-        }
+        print!("{a}");
     }
 
     Ok(Value::Bool(true))
