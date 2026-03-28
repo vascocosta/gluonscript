@@ -41,4 +41,15 @@ Returns a list with all the command line arguments passed into the script.
 ## Module: `http`
 
 ### `fn get(url: String): Record { error: Bool, value: String }`
-Returns a result record with a boolean error and the server response at url as a string.
+Returns a result record with a boolean error and the server response from url as a string.
+
+## Module: `io`
+
+### `fn input(): String`
+Returns a string with the content read from the standard input.
+
+### `fn print(any: Any...): None`
+Prints every value passed as argument to the standard output.
+
+### `fn println(any: Any...): None`
+Prints every value passed as argument to the standard output and appends a newline char.
