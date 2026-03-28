@@ -6,7 +6,7 @@ description: "A dynamically typed language with the bare minimum features to be 
 permalink: /
 ---
 
-# gluonscript
+# GluonScript
 
 A dynamically typed language with the bare minimum features to be enjoyable and simple to use.
 
