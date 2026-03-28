@@ -98,7 +98,7 @@ Output:
 
 ### Example 3
 
-```Python
+```python
 conv = import("conv")
 io = import("io")
 
@@ -141,7 +141,7 @@ Age: 45
 
 ### Example 4
 
-```Python
+```py
 env = import("env")
 http = import("http")
 io = import("io")
