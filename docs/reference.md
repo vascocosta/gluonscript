@@ -19,7 +19,7 @@ Returns a record with all the functions exported by the module defined in file.
 ### `fn len(list: List): Int`
 Returns the length of a list.
 
-### ```python fn slice(list: List, start: Int, end: Int): List```
+```python fn slice(list: List, start: Int, end: Int): List```
 Returns a new list which is a slice of the list passed as argument, between index start and end.
 
 ## Module: `conv`
@@ -30,5 +30,12 @@ Returns a float by converting the string passed as argument.
 ### `fn int(string: String): Int`
 Returns an int by converting the string passed as argument.
 
-### ```python fn string(any: Any): String```
+```python
+fn string(any: Any): String
+```
 Returns a string by converting the type passed as argument into its string representation.
+
+## Module: `env`
+
+### `fn args(): List`
+Returns a list with all the command line arguments passed into the script.
