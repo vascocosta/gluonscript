@@ -1,3 +1,11 @@
+---
+layout: default
+title: Home
+nav_order: 1
+description: "A dynamically typed language with the bare minimum features to be enjoyable and simple to use."
+permalink: /
+---
+
 # gluonscript
 
 A dynamically typed language with the bare minimum features to be enjoyable and simple to use.

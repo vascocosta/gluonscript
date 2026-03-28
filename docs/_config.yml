@@ -1,0 +1,7 @@
+remote_theme: just-the-docs/just-the-docs
+title: GluonScript
+description: Documentation for the GluonScript programming language.
+
+aux_links:
+  "GluonScript on GitHub":
+    - "https://github.com/vascocosta/GluonScript"
