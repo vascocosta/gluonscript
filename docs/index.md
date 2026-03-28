@@ -31,7 +31,7 @@ A dynamically typed language with the bare minimum features to be enjoyable and 
 
 ### Example 1
 
-```js
+```python
 io = import("io")
 
 fn generic_operation(a, b, operation) {
@@ -61,7 +61,7 @@ Output:
 
 ### Example 2
 
-```js
+```python
 io = import("io")
 
 fn even_odd(numbers) {
@@ -141,7 +141,7 @@ Age: 45
 
 ### Example 4
 
-```py
+```python
 env = import("env")
 http = import("http")
 io = import("io")
