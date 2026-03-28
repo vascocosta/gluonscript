@@ -3,8 +3,12 @@ title: GluonScript
 description: Documentation for the GluonScript programming language.
 
 color_scheme: dark 
-
 night_mode: true
+
+kramdown:
+  syntax_highlighter: rouge
+
+highlighter: rouge
 
 aux_links:
   "GluonScript on GitHub":
