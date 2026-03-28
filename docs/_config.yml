@@ -2,6 +2,10 @@ remote_theme: just-the-docs/just-the-docs
 title: GluonScript
 description: Documentation for the GluonScript programming language.
 
+color_scheme: dark 
+
+night_mode: true
+
 aux_links:
   "GluonScript on GitHub":
     - "https://github.com/vascocosta/GluonScript"
