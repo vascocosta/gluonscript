@@ -8,13 +8,16 @@ has_children: true
 # Built-in Functions Reference
 Explore the standard library functions available in GluonScript.
 
-{: .note }
-> All functions below are available in the `core` namespace and do not require explicit imports.
+## Module: `core`
 
-## String Functions
+### `fn append(list: List, element: Any): List`
+Returns a new list with the element passed as argument appended to it.
+
+### `fn import(file: String): Record`
+Returns a record with all the functions exported by the module defined in file.
 
 ### `fn len(list: List): Int`
-Returns the length of a List.
+Returns the length of a list.
 
 ### `fn slice(list List, start: Int, end: Int): List`
-Returns a slice of a List, between index start and end.
+Returns a new list which is a slice of the list passed as argument, between index start and end.
