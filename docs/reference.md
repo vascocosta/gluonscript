@@ -10,22 +10,53 @@ Explore the standard library functions available in GluonScript.
 
 ## Module `core`
 
-[fn append(list: List, element: Any): List](https://gluonscript.org/reference.html#fn-appendlist-list-element-any-list)<br>
-[fn import(file: String): Record](https://gluonscript.org/reference.html#fn-importfile-string-record)<br>
-[fn len(list: List): Int](https://gluonscript.org/reference.html#fn-lenlist-list-int)<br>
-[fn slice(list: List, start: Int, end: Int): List](https://gluonscript.org/reference.html#fn-slicelist-list-start-int-end-int-list)
+[fn append(list: List, element: Any): List](#fn-appendlist-list-element-any-list)<br>
+[fn import(file: String): Record](#fn-importfile-string-record)<br>
+[fn len(list: List): Int](#fn-lenlist-list-int)<br>
+[fn slice(list: List, start: Int, end: Int): List](#fn-slicelist-list-start-int-end-int-list)
+
+---
 
 ## Module `conv`
 
+[fn float(string: String): Float](#fn-floatstring-string-float)<br>
+[fn int(string: String): Int](#fn-intstring-string-int)<br>
+[fn string(any: Any): String](#fn-stringany-any-string)
+
+---
+
 ## Module `env`
+
+[fn args(): List](#fn-args-list)
+
+---
 
 ## Module `http`
 
+[fn get(url: String): Record { error: Bool, value: String }](#fn-geturl-string-record--error-bool-value-string-)
+
+---
+
 ## Module `io`
+
+[fn input(): String](#fn-input-string)<br>
+[fn print(any: Any...): None](#fn-printany-any-none)<br>
+[fn println(any: Any...): None](#fn-printlnany-any-none)
+
+---
 
 ## Module `json`
 
+[fn parse(json: String): Record](#fn-parsejson-string-record)
+
+---
+
 ## Module `strings`
+
+[fn join(list: List, sep: String): String](#fn-joinlist-list-sep-string-string)<br>
+[fn lower(string: String): String](#fn-lowerstring-string-string)<br>
+[fn upper(string: String): String](#fn-upperstring-string-string)<br>
+[fn split(string: String, sep: String): List](#fn-splitstring-string-sep-string-list)
 
 ---
 
