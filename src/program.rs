@@ -1,6 +1,6 @@
 use crate::{
-    ast::{ExecResult, Stmt},
-    runtime::{Env, RuntimeError},
+    ast::{ExecResult, Expr, Stmt},
+    runtime::{Env, RuntimeError, Value},
 };
 
 pub struct Program {
@@ -17,6 +17,17 @@ impl Program {
 
         for stmt in &self.statements {
             if let ExecResult::Value(v) = stmt.exec(&mut env)? {
+                last = ExecResult::Value(v);
+            }
+        }
+
+        if let Some(Value::Function(_)) = env.get_vars("main") {
+            let main_call = Stmt::Expr(Expr::Call {
+                callee: Box::new(Expr::Variable("main".to_string())),
+                args: vec![],
+            });
+
+            if let ExecResult::Value(v) = main_call.exec(&mut env)? {
                 last = ExecResult::Value(v);
             }
         }
