@@ -8,11 +8,13 @@ has_children: true
 # From source
 
 1. Fetch the source code from GitHub by cloning the repo with:
+
 ```
 git clone https://github.com/vascocosta/gluonscript.git
 ```
 
 2. Compile the source code (you need the `Rust toolchain`):
+
 ```
 cd gluonscript
 cargo build -r
