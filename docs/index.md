@@ -6,7 +6,10 @@ description: "A dynamically typed language with the bare minimum features to be 
 permalink: /
 ---
 
-# GluonScript
+<div style="display: flex; align-items: center;">
+    <img src="logo.png" alt="GluonScript logo" width="80" style="margin-right: 12px;" />
+    <h1 style="margin: 0;">GluonScript</h1>
+</div>
 
 A dynamically typed language with the bare minimum features to be enjoyable and simple to use.
 
