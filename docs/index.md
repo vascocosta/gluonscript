@@ -7,7 +7,7 @@ permalink: /
 ---
 
 <div style="display: flex; align-items: center;">
-    <img src="logo.png" alt="GluonScript logo" width="80" style="margin-right: 12px;" />
+    <img src="logo.png" alt="GluonScript logo" width="64" style="margin-right: 12px;" />
     <h1 style="margin: 0;">GluonScript</h1>
 </div>
 
