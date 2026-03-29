@@ -184,8 +184,6 @@ fn main() {
         io.print(result.value)
     }
 }
-
-main()
 ```
 
 ```
