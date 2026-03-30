@@ -47,8 +47,8 @@ pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
 }
 
 pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
-    match &args[0] {
-        Value::String(s) => match s.as_str() {
+    match args.first() {
+        Some(Value::String(s)) => match s.as_str() {
             "conv" => conv::module(),
             "env" => env::module(),
             "http" => http::module(),
@@ -91,9 +91,9 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
 }
 
 pub fn len(args: Vec<Value>) -> Result<Value, RuntimeError> {
-    match &args[0] {
-        Value::List(v) => Ok(Value::Int(v.len() as i64)),
-        Value::String(s) => Ok(Value::Int(s.len() as i64)),
+    match args.first() {
+        Some(Value::List(v)) => Ok(Value::Int(v.len() as i64)),
+        Some(Value::String(s)) => Ok(Value::Int(s.len() as i64)),
         _ => Err(RuntimeError::Message("len: unsuported type")),
     }
 }

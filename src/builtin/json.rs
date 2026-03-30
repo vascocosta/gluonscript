@@ -11,8 +11,8 @@ pub fn module() -> Result<Value, RuntimeError> {
 }
 
 pub fn parse(args: Vec<Value>) -> Result<Value, RuntimeError> {
-    match &args[0] {
-        Value::String(s) => match serde_json::from_str(s) {
+    match args.first() {
+        Some(Value::String(s)) => match serde_json::from_str(s) {
             Ok(parsed_json) => Ok(Value::Record(HashMap::from([
                 ("error".to_string(), Value::Bool(false)),
                 ("value".to_string(), json_to_value(parsed_json)),

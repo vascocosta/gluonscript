@@ -11,8 +11,8 @@ pub fn module() -> Result<Value, RuntimeError> {
 }
 
 pub fn get(args: Vec<Value>) -> Result<Value, RuntimeError> {
-    match &args[0] {
-        Value::String(s) => {
+    match args.first() {
+        Some(Value::String(s)) => {
             let response = reqwest::blocking::get(s);
 
             match response {
