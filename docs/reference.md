@@ -53,10 +53,12 @@ Explore the standard library functions available in GluonScript.
 
 ## Module `strings`
 
+[fn contains(string: String, substr: String): Bool](#fn-containsstring-string-substr-string-bool)<br>
 [fn join(list: List, sep: String): String](#fn-joinlist-list-sep-string-string)<br>
 [fn lower(string: String): String](#fn-lowerstring-string-string)<br>
 [fn upper(string: String): String](#fn-upperstring-string-string)<br>
-[fn split(string: String, sep: String): List](#fn-splitstring-string-sep-string-list)
+[fn split(string: String, sep: String): List](#fn-splitstring-string-sep-string-list)<br>
+[fn replace(string: String, old: String, new: String): String](#fn-replacestring-string-old-string-new-string-string)
 
 ---
 
