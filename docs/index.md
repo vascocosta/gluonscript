@@ -13,6 +13,28 @@ permalink: /
 
 A dynamically typed language with the bare minimum features to be enjoyable and simple to use.
 
+```python
+io = import("io")
+strings = import("strings")
+
+fn main() {
+    list = ["Not", "Yet", "Yellow", "World", "But", "Almost"]
+
+    text = list
+        |> slice(2, len(list) - 2) # Slice the list to get rid of extra words.
+        |> strings.join(" ") # Create a string by joining words from the list.
+        |> strings.replace("Yellow", "Hello") # Fix the typo (Yellow > Hello).
+        |> append("!") # Finally append !, although the + operator also works.
+
+    io.println(text)
+}
+```
+
+```
+```
+Hello World!
+```
+
 ## Features
 
 * Minimalist but ergonomic and consistent syntax
