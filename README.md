@@ -1,4 +1,13 @@
-# <img src="https://gluonscript.org/logo.png" width="64"> GluonScript
+<table>
+  <tr>
+    <td valign="middle">
+      <img src="https://gluonscript.org/logo.png" width="64">
+    </td>
+    <td valign="middle">
+      <h1 style="margin: 0;">GluonScript</h1>
+    </td>
+  </tr>
+</table>
 
 A dynamically typed language with the bare minimum features to be enjoyable and simple to use.
 
