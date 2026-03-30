@@ -31,7 +31,6 @@ fn main() {
 ```
 
 ```
-```
 Hello World!
 ```
 
