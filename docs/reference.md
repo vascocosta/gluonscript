@@ -152,6 +152,12 @@ Parses the given JSON string and returns a result record. The `error` field indi
 
 ## Module: `strings`
 
+## `fn contains(string: String, substr: String): Bool`
+
+Returns `true` if the given string contains the specified substring, and `false` otherwise.
+
+---
+
 ## `fn join(list: List, sep: String): String`
 
 Returns a string created by concatenating the string representation of each element in the list, separated by the specified delimiter.
@@ -173,3 +179,9 @@ Returns a new string with all characters from the input string converted to uppe
 ## `fn split(string: String, sep: String): List`
 
 Returns a list of substrings obtained by splitting the input string using the specified separator.
+
+---
+
+## `fn replace(string: String, old: String, new: String): String`
+
+Returns a new string where all occurrences of the specified substring are replaced with the provided replacement string. The original string is not modified.
