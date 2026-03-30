@@ -1,10 +1,10 @@
-<table>
+<table border="0" cellpadding="0" cellspacing="0">
   <tr>
-    <td width="80">
+    <td>
       <img src="https://gluonscript.org/logo.png" width="64">
     </td>
     <td>
-      <h1 style="margin: 0;">GluonScript</h1>
+      <h1>GluonScript</h1>
     </td>
   </tr>
 </table>
