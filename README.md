@@ -1,9 +1,9 @@
 <table>
   <tr>
-    <td valign="middle">
+    <td width="80">
       <img src="https://gluonscript.org/logo.png" width="64">
     </td>
-    <td valign="middle">
+    <td>
       <h1 style="margin: 0;">GluonScript</h1>
     </td>
   </tr>
