@@ -60,7 +60,7 @@ Explore the standard library functions available in GluonScript.
 
 ---
 
-# Module: `core`
+## Module: `core`
 
 ## `fn append(list: List, element: Any): List`
 
@@ -86,7 +86,7 @@ Returns a new list containing the elements of the input list between the specifi
 
 ---
 
-# Module: `conv`
+## Module: `conv`
 
 ## `fn float(string: String): Float`
 
@@ -106,7 +106,7 @@ Returns the string representation of the given value.
 
 ---
 
-# Module: `env`
+## Module: `env`
 
 ## `fn args(): List`
 
@@ -114,7 +114,7 @@ Returns a list containing all command-line arguments passed to the script, in th
 
 ---
 
-# Module: `http`
+## Module: `http`
 
 ## `fn get(url: String): Record { error: Bool, value: String }`
 
@@ -122,7 +122,7 @@ Performs an HTTP GET request to the specified URL and returns a result record. T
 
 ---
 
-# Module: `io`
+## Module: `io`
 
 ## `fn input(): String`
 
@@ -142,15 +142,15 @@ Writes the string representation of each provided argument to standard output, f
 
 ---
 
-# Module: `json`
+## Module: `json`
 
-## `fn parse(json: String): Record`
+## `fn parse(json: String): Record { error: Bool, value: Record }`
 
-Parses the given JSON string and returns a result record containing the parsed value. The record indicates whether parsing succeeded and includes either the resulting value or an error message.
+Parses the given JSON string and returns a result record. The `error` field indicates whether parsing failed, and the `value` field contains either the parsed JSON value as a record or an error message.
 
 ---
 
-# Module: `strings`
+## Module: `strings`
 
 ## `fn join(list: List, sep: String): String`
 
