@@ -5,7 +5,17 @@ nav_order: 2
 has_children: true
 ---
 
-# From source
+## From binaries
+
+- Fetch the [latest release](https://github.com/vascocosta/gluonscript/releases) for your platform from GitHub.
+
+- Extract the archive into a location of your choosing.
+
+- Add the location of the `gluonscript` binary to your `PATH`.
+
+---
+
+## From source
 
 - Fetch the source code from GitHub by cloning the repo with:
 
@@ -20,12 +30,20 @@ cd gluonscript
 cargo build -r
 ```
 
-- Copy the generated binary into a location in your PATH.
+- Add the location of the `gluonscript` binary to your `PATH`.
 
 ---
 
-# From binaries
+## Notes
 
-- Fetch the [latest release](https://github.com/vascocosta/gluonscript/releases) from GitHub.
+As you can see there is no installer, the interpreter is self-contained and can be executed from anywhere. However, it is strongly recommended that you add the location of the binary to your `PATH` variable so that you can run `gluonscript` from anywhere on the command line.
 
-- Uncompress the archive into a location in your PATH.
+### Running a script
+
+- Edit `my_script.gs` on your preferred IDE.
+
+- Run the script from the command line:
+
+```
+gluonscript my_script.gs
+```
