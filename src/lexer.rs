@@ -317,17 +317,36 @@ impl Lexer {
     }
 
     fn lex_string(&mut self) -> Result<Token, ScanError> {
-        let start = self.pos;
+        let mut string = String::new();
 
         while let Some(c) = self.peek() {
             if c == '"' {
                 break;
+            } else if c == '\\' {
+                self.consume();
+
+                if let Some(c) = self.peek() {
+                    self.consume();
+
+                    match c {
+                        'n' => string.push('\n'),
+                        't' => string.push('\t'),
+                        '"' => string.push('\"'),
+                        '\'' => string.push('\''),
+                        '\\' => string.push('\\'),
+                        _ => {
+                            return Err(ScanError {
+                                message: "unsupported escape sequence".to_string(),
+                                pos: self.pos,
+                            });
+                        }
+                    }
+                }
             } else {
+                string.push(c);
                 self.consume();
             }
         }
-
-        let string: String = self.chars[start..self.pos].iter().collect();
 
         match self.consume() {
             Some('"') => {}
