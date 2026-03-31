@@ -34,11 +34,15 @@ fn main() {
 Hello World!
 ```
 
+---
+
 ## Philosophy
 
 GluonScript was born out of my interest in learning how to implement an interpreted programming language in Rust. However it soon evolved from a toy language into a language that I enjoy using for real scripting purposes as the syntax and main concepts were inspired by some of the languages I enjoy the most. The language draws from Rust, Python, Go, JavaScript and Gleam, as you may notice on its syntax, types and ideas.
 
-One of the guiding principles is minimalism, but without making it boringly simple. I will keep the language simple enough to be able to keep it in my head or for a new learner to be able to learn it in a weekend, nevertheless I do like some features that despite not being strictly necessary, make using the language much more enjoyable. For instance, I consider first-class functions, lambdas and closures crucial. That said, I also like a good balance between imperative and functional style, supporting both equally.
+The core guiding principle is minimalism, but without making it boringly simple. I will keep the language simple enough to be able to keep it in my head or for a new learner to learn it in a weekend, nevertheless I do like some features that despite not being strictly necessary, make using the language more enjoyable. For instance, I consider first-class functions, lambdas, closures and immutable data structures crucial. That said, I also like a good balance between imperative and functional style, supporting both.
+
+---
 
 ## Features
 
@@ -56,6 +60,8 @@ One of the guiding principles is minimalism, but without making it boringly simp
 * Balanced imperative/functional style
 * Ideal for new and experienced programmers
 * Implemented in Rust taking advantage of its ownership model (no GC)
+
+---
 
 ## Examples
 

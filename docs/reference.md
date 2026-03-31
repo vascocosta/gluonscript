@@ -5,8 +5,8 @@ nav_order: 3
 has_children: true
 ---
 
-# Built-in Functions Reference
-Explore the standard library functions available in GluonScript.
+## Built-in Functions Reference
+Explore the standard library functions.
 
 ## Module `core`
 
