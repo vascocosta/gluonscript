@@ -1,11 +1,10 @@
 mod conv;
 mod env;
+mod fs;
 mod http;
 mod io;
 mod json;
 mod strings;
-
-use std::fs;
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;
@@ -51,13 +50,14 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
         Some(Value::String(s)) => match s.as_str() {
             "conv" => conv::module(),
             "env" => env::module(),
+            "fs" => fs::module(),
             "http" => http::module(),
             "io" => io::module(),
             "json" => json::module(),
             "strings" => strings::module(),
 
             _ => {
-                let source = fs::read_to_string(s)
+                let source = std::fs::read_to_string(s)
                     .map_err(|_| RuntimeError::Message("import: could not read source file"))?;
 
                 let mut lexer = Lexer::new(&source);
