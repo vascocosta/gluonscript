@@ -33,7 +33,7 @@ Explore the standard library functions.
 
 ## Module `fs`
 
-[fn read_file(path: String): String](#fn-read_filepath-string-string)
+[fn read_file(path: String): String](#fn-read_filepath-string-record--error-bool-value-string-)
 
 ---
 
