@@ -88,7 +88,21 @@ impl Display for Value {
                 write!(fmt, "[{}]", values.join(", "))
             }
 
-            Value::Record(o) => write!(fmt, "{:?}", o),
+            Value::Record(r) => {
+                let values: Vec<String> = r
+                    .iter()
+                    .map(|(k, v)| {
+                        if let Value::String(s) = v {
+                            format!("\"{}\": \"{}\"", k, s)
+                        } else {
+                            format!("\"{}\": {}", k, v.to_string())
+                        }
+                    })
+                    .collect();
+
+                write!(fmt, "{{{}}}", values.join(", "))
+            }
+
             Value::Function(f) => write!(fmt, "{:?}", f),
             Value::BuiltinFunction(f) => write!(fmt, "{:?}", f),
         }

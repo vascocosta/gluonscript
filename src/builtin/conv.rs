@@ -44,11 +44,11 @@ pub fn int(args: Vec<Value>) -> Result<Value, RuntimeError> {
 
 pub fn string(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
-        Some(Value::Int(n)) => Ok(Value::String(n.to_string())),
-        Some(Value::Float(n)) => Ok(Value::String(n.to_string())),
-        Some(Value::Bool(b)) => Ok(Value::String(b.to_string())),
-        Some(Value::List(l)) => Ok(Value::String(format!("{:?}", l))),
-        Some(Value::Record(r)) => Ok(Value::String(format!("{:?}", r))),
-        _ => Err(RuntimeError::Message("unable to convert type to string")),
+        Some(v) => Ok(Value::String(v.to_string())),
+
+        None => Err(RuntimeError::Arity {
+            expected: 1,
+            got: 0,
+        }),
     }
 }
