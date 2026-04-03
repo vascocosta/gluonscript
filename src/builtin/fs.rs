@@ -6,6 +6,7 @@ pub fn module() -> Result<Value, RuntimeError> {
     let mut map = HashMap::new();
 
     map.insert("read_file".to_string(), Value::BuiltinFunction(read_file));
+    map.insert("write_file".to_string(), Value::BuiltinFunction(write_file));
 
     Ok(Value::Record(map))
 }
@@ -22,6 +23,46 @@ pub fn read_file(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 ("error".to_string(), Value::Bool(true)),
                 ("value".to_string(), Value::String(e.to_string())),
             ]))),
+        },
+
+        other => Err(RuntimeError::TypeError {
+            expected: "string",
+            got: format!("{:?}", other),
+        }),
+    }
+}
+
+pub fn write_file(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
+    if args.len() != 2 {
+        return Err(RuntimeError::Arity {
+            expected: 2,
+            got: args.len(),
+        });
+    }
+
+    let contents = args.pop().ok_or(RuntimeError::Arity {
+        expected: 2,
+        got: args.len(),
+    })?;
+
+    match args.pop() {
+        Some(Value::String(path)) => match contents {
+            Value::String(contents) => match std::fs::write(path, contents) {
+                Ok(_) => Ok(Value::Record(HashMap::from([
+                    ("error".to_string(), Value::Bool(false)),
+                    ("value".to_string(), Value::None),
+                ]))),
+
+                Err(e) => Ok(Value::Record(HashMap::from([
+                    ("error".to_string(), Value::Bool(true)),
+                    ("value".to_string(), Value::String(e.to_string())),
+                ]))),
+            },
+
+            other => Err(RuntimeError::TypeError {
+                expected: "string",
+                got: format!("{:?}", other),
+            }),
         },
 
         other => Err(RuntimeError::TypeError {

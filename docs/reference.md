@@ -35,7 +35,8 @@ Explore the standard library functions.
 
 ## Module `fs`
 
-[fn read_file(path: String): String](#fn-read_filepath-string-record--error-bool-value-string-)
+[fn read_file(path: String): Record { error: Bool, value: String }](#fn-read_filepath-string-record--error-bool-value-string-)<br>
+[fn write_file(path: String, contents: String): Record { error: Bool, value: None }](#fn-write_filepath-string-contents-string--record--error-bool-value-none-)
 
 ---
 
@@ -141,6 +142,10 @@ Returns a record containing all environment variables of the current process as 
 ## `fn read_file(path: String): Record { error: Bool, value: String }`
 
 Reads the file located at the specified path and returns a result record. The `error` field indicates whether the read operation failed, and the `value` field contains either the file contents as a string or an error message.
+
+## `fn write_file(path: String, contents: String): Record { error: Bool, value: None }`
+
+Writes the specified contents to the file located at the specified path and returns a result record. The `error` field indicates whether the read operation failed, and the `value` field contains either none or an error message.
 
 ---
 
