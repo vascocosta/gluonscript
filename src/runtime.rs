@@ -141,6 +141,8 @@ impl Env {
             Value::BuiltinFunction(builtin::append),
         );
 
+        self.set("exit".to_string(), Value::BuiltinFunction(builtin::exit));
+
         self.set(
             "import".to_string(),
             Value::BuiltinFunction(builtin::import),

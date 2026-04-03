@@ -6,6 +6,8 @@ mod io;
 mod json;
 mod strings;
 
+use std::process;
+
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::runtime::{Env, RuntimeError, Value};
@@ -41,6 +43,22 @@ pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
 
         other => Err(RuntimeError::TypeError {
             expected: "list",
+            got: format!("{:?}", other),
+        }),
+    }
+}
+
+pub fn exit(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    match args.first() {
+        Some(Value::Int(code)) => process::exit(*code as i32),
+
+        None => Err(RuntimeError::Arity {
+            expected: 1,
+            got: 0,
+        }),
+
+        other => Err(RuntimeError::TypeError {
+            expected: "int",
             got: format!("{:?}", other),
         }),
     }

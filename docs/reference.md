@@ -11,6 +11,7 @@ Explore the standard library functions.
 ## Module `core`
 
 [fn append(list: List, element: Any): List](#fn-appendlist-list-element-any-list)<br>
+[fn exit(code: Int): None](#fn-exitint-none)<br>
 [fn import(file: String): Record](#fn-importfile-string-record)<br>
 [fn len(list: List): Int](#fn-lenlist-list-int)<br>
 [fn slice(list: List, start: Int, end: Int): List](#fn-slicelist-list-start-int-end-int-list)
@@ -74,6 +75,12 @@ Explore the standard library functions.
 ## `fn append(list: List, element: Any): List`
 
 Returns a new list containing all elements of the input list, with the provided element appended at the end. The original list is not modified.
+
+---
+
+## `fn exit(code: Int): None`
+
+Terminates the current process immediately and passes the specified exit code to the operating system.
 
 ---
 
