@@ -1,4 +1,7 @@
-use std::{collections::HashMap, io};
+use std::{
+    collections::HashMap,
+    io::{self, Write},
+};
 
 use crate::runtime::{RuntimeError, Value};
 
@@ -28,6 +31,8 @@ pub fn print(args: Vec<Value>) -> Result<Value, RuntimeError> {
     for a in args {
         print!("{a}");
     }
+
+    io::stdout().flush().unwrap();
 
     Ok(Value::None)
 }
