@@ -17,11 +17,13 @@ pub fn parse(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 ("error".to_string(), Value::Bool(false)),
                 ("value".to_string(), json_to_value(parsed_json)),
             ]))),
+
             Err(e) => Ok(Value::Record(HashMap::from([
                 ("error".to_string(), Value::Bool(true)),
                 ("value".to_string(), Value::String(e.to_string())),
             ]))),
         },
+
         other => Err(RuntimeError::TypeError {
             expected: "string",
             got: format!("{:?}", other),
@@ -32,6 +34,7 @@ pub fn parse(args: Vec<Value>) -> Result<Value, RuntimeError> {
 fn json_to_value(v: serde_json::Value) -> Value {
     match v {
         serde_json::Value::Bool(b) => Value::Bool(b),
+
         serde_json::Value::Number(n) => {
             if n.is_i64() {
                 Value::Int(n.as_i64().unwrap_or_default())
@@ -43,9 +46,11 @@ fn json_to_value(v: serde_json::Value) -> Value {
                 Value::None
             }
         }
+
         serde_json::Value::String(s) => Value::String(s),
         serde_json::Value::Null => Value::None,
         serde_json::Value::Array(arr) => Value::List(arr.into_iter().map(json_to_value).collect()),
+
         serde_json::Value::Object(map) => Value::Record(
             map.into_iter()
                 .map(|(k, v)| (k, json_to_value(v)))

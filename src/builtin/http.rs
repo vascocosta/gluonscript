@@ -21,17 +21,20 @@ pub fn get(args: Vec<Value>) -> Result<Value, RuntimeError> {
                         ("error".to_string(), Value::Bool(false)),
                         ("value".to_string(), Value::String(text)),
                     ]))),
+
                     Err(e) => Ok(Value::Record(HashMap::from([
                         ("error".to_string(), Value::Bool(true)),
                         ("value".to_string(), Value::String(e.to_string())),
                     ]))),
                 },
+
                 Err(e) => Ok(Value::Record(HashMap::from([
                     ("error".to_string(), Value::Bool(true)),
                     ("value".to_string(), Value::String(e.to_string())),
                 ]))),
             }
         }
+
         other => Err(RuntimeError::TypeError {
             expected: "string",
             got: format!("{:?}", other),

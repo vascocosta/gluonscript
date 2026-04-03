@@ -32,6 +32,7 @@ pub fn contains(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
         Some(Value::String(s)) => {
             let substr = match value {
                 Value::String(substr) => substr,
+
                 other => {
                     return Err(RuntimeError::TypeError {
                         expected: "string",
@@ -77,6 +78,7 @@ pub fn join(args: Vec<Value>) -> Result<Value, RuntimeError> {
 pub fn lower(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
         Some(Value::String(s)) => Ok(Value::String(s.to_lowercase())),
+
         other => Err(RuntimeError::TypeError {
             expected: "string",
             got: format!("{:?}", other),
@@ -87,6 +89,7 @@ pub fn lower(args: Vec<Value>) -> Result<Value, RuntimeError> {
 pub fn upper(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
         Some(Value::String(s)) => Ok(Value::String(s.to_uppercase())),
+
         other => Err(RuntimeError::TypeError {
             expected: "string",
             got: format!("{:?}", other),
@@ -116,6 +119,7 @@ pub fn replace(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
         Some(Value::String(s)) => {
             let old = match old_value {
                 Value::String(old) => old,
+
                 other => {
                     return Err(RuntimeError::TypeError {
                         expected: "string",
@@ -126,6 +130,7 @@ pub fn replace(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
 
             let new = match new_value {
                 Value::String(new) => new,
+
                 other => {
                     return Err(RuntimeError::TypeError {
                         expected: "string",

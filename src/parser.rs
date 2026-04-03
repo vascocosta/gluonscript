@@ -26,6 +26,7 @@ impl Parser {
     fn consume(&mut self) -> Option<Token> {
         let t = self.peek().cloned();
         self.pos += 1;
+
         t
     }
 
@@ -47,6 +48,7 @@ impl Parser {
             Some(Token::Return) => self.parse_return(),
             Some(Token::Break) => self.parse_break(),
             Some(Token::Continue) => self.parse_continue(),
+
             Some(Token::Ident(_)) => match self.peek_next() {
                 Some(Token::Equals) => self.parse_assign(),
                 Some(Token::PlusEquals) => self.parse_op_assign(Operator::Add),
@@ -55,6 +57,7 @@ impl Parser {
                 Some(Token::SlashEquals) => self.parse_op_assign(Operator::Div),
                 _ => Ok(Stmt::Expr(self.parse_expr(0)?)),
             },
+
             Some(Token::Fn) => self.parse_function(),
             _ => Ok(Stmt::Expr(self.parse_expr(0)?)),
         }
@@ -63,6 +66,7 @@ impl Parser {
     fn parse_assign(&mut self) -> Result<Stmt, ParseError> {
         let name = match self.consume() {
             Some(Token::Ident(n)) => n,
+
             _ => {
                 return Err(ParseError {
                     message: "expected identifier".to_string(),
@@ -81,6 +85,7 @@ impl Parser {
     fn parse_op_assign(&mut self, op: Operator) -> Result<Stmt, ParseError> {
         let name = match self.consume() {
             Some(Token::Ident(n)) => n,
+
             _ => {
                 return Err(ParseError {
                     message: "expected identifier".to_string(),
@@ -111,6 +116,7 @@ impl Parser {
         // Discard Token::LBrace
         match self.consume() {
             Some(Token::LBrace) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected {{".to_string(),
@@ -133,6 +139,7 @@ impl Parser {
 
             match self.consume() {
                 Some(Token::LBrace) => {}
+
                 _ => {
                     return Err(ParseError {
                         message: "expected {{".to_string(),
@@ -162,6 +169,7 @@ impl Parser {
 
         match self.consume() {
             Some(Token::LBrace) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected {{".to_string(),
@@ -186,6 +194,7 @@ impl Parser {
 
         let var = match self.consume() {
             Some(Token::Ident(n)) => n,
+
             _ => {
                 return Err(ParseError {
                     message: "expected variable name".to_string(),
@@ -196,6 +205,7 @@ impl Parser {
 
         match self.consume() {
             Some(Token::In) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected 'in'".to_string(),
@@ -208,6 +218,7 @@ impl Parser {
 
         match self.consume() {
             Some(Token::LBrace) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected {{identifier}}".to_string(),
@@ -236,6 +247,7 @@ impl Parser {
 
         let name = match self.consume() {
             Some(Token::Ident(n)) => n,
+
             _ => {
                 return Err(ParseError {
                     message: "expected function name".to_string(),
@@ -246,6 +258,7 @@ impl Parser {
 
         match self.consume() {
             Some(Token::LParen) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected '('".to_string(),
@@ -260,6 +273,7 @@ impl Parser {
             loop {
                 match self.consume() {
                     Some(Token::Ident(p)) => params.push(p),
+
                     _ => {
                         return Err(ParseError {
                             message: "expected parameter name".to_string(),
@@ -278,6 +292,7 @@ impl Parser {
 
         match self.consume() {
             Some(Token::RParen) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected ')'".to_string(),
@@ -288,6 +303,7 @@ impl Parser {
 
         match self.consume() {
             Some(Token::LBrace) => {}
+
             _ => {
                 return Err(ParseError {
                     message: "expected {{".to_string(),
@@ -339,6 +355,7 @@ impl Parser {
 
                     match self.consume() {
                         Some(Token::RBracket) => {}
+
                         _ => {
                             return Err(ParseError {
                                 message: "expected ']'".to_string(),
@@ -358,6 +375,7 @@ impl Parser {
 
                     let name = match self.consume() {
                         Some(Token::Ident(n)) => n,
+
                         _ => {
                             return Err(ParseError {
                                 message: "expected property name".to_string(),
@@ -391,6 +409,7 @@ impl Parser {
 
                     match self.consume() {
                         Some(Token::RParen) => {}
+
                         _ => {
                             return Err(ParseError {
                                 message: "expected ')'".to_string(),
@@ -416,6 +435,7 @@ impl Parser {
             };
 
             let prec = Operator::precedence(&op);
+
             if prec < min_prec {
                 break;
             }
@@ -453,6 +473,7 @@ impl Parser {
             Some(Token::String(s)) => Ok(Expr::String(s)),
             Some(Token::True) => Ok(Expr::Bool(true)),
             Some(Token::False) => Ok(Expr::Bool(false)),
+
             Some(Token::Ident(name)) => {
                 // check if this is a function call
                 if matches!(self.peek(), Some(Token::LParen)) {
@@ -475,6 +496,7 @@ impl Parser {
 
                     match self.consume() {
                         Some(Token::RParen) => {}
+
                         _ => {
                             return Err(ParseError {
                                 message: "expected ')'".to_string(),
@@ -491,6 +513,7 @@ impl Parser {
                     Ok(Expr::Variable(name))
                 }
             }
+
             Some(Token::LParen) => {
                 let expr = self.parse_expr(0);
 
@@ -504,6 +527,7 @@ impl Parser {
                     }
                 }
             }
+
             Some(Token::LBracket) => {
                 let mut elements = Vec::new();
 
@@ -521,6 +545,7 @@ impl Parser {
 
                 match self.consume() {
                     Some(Token::RBracket) => {}
+
                     _ => {
                         return Err(ParseError {
                             message: "expected ']'".to_string(),
@@ -531,6 +556,7 @@ impl Parser {
 
                 Ok(Expr::ListLiteral(elements))
             }
+
             Some(Token::LBrace) => {
                 let mut fields = Vec::new();
 
@@ -538,6 +564,7 @@ impl Parser {
                     loop {
                         let key = match self.consume() {
                             Some(Token::Ident(name)) => name,
+
                             _ => {
                                 return Err(ParseError {
                                     message: "expected key".to_string(),
@@ -548,6 +575,7 @@ impl Parser {
 
                         match self.consume() {
                             Some(Token::Colon) => {}
+
                             _ => {
                                 return Err(ParseError {
                                     message: "expected ':'".to_string(),
@@ -570,6 +598,7 @@ impl Parser {
 
                 match self.consume() {
                     Some(Token::RBrace) => {}
+
                     _ => {
                         return Err(ParseError {
                             message: "expected }}".to_string(),
@@ -580,6 +609,7 @@ impl Parser {
 
                 Ok(Expr::RecordLiteral(fields))
             }
+
             Some(Token::Fn) => {
                 match self.consume() {
                     Some(Token::LParen) => {}

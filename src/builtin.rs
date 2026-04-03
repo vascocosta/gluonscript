@@ -32,6 +32,7 @@ pub fn append(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
 
         Some(Value::String(s1)) => match value {
             Value::String(s2) => Ok(Value::String(format!("{}{}", s1, s2))),
+
             other => Err(RuntimeError::TypeError {
                 expected: "string",
                 got: format!("{:?}", other),

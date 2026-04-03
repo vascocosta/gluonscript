@@ -68,7 +68,6 @@ impl Value {
             }
 
             Value::BuiltinFunction(f) => f(args),
-
             _ => Err(RuntimeError::Message("type is not callable")),
         }
     }
@@ -82,10 +81,13 @@ impl Display for Value {
             Value::Float(f) => write!(fmt, "{}", f),
             Value::String(s) => write!(fmt, "{s}"),
             Value::Bool(b) => write!(fmt, "{b}"),
+
             Value::List(v) => {
                 let values: Vec<String> = v.iter().map(|v| format!("{}", v)).collect();
+
                 write!(fmt, "[{}]", values.join(", "))
             }
+
             Value::Record(o) => write!(fmt, "{:?}", o),
             Value::Function(f) => write!(fmt, "{:?}", f),
             Value::BuiltinFunction(f) => write!(fmt, "{:?}", f),

@@ -19,6 +19,7 @@ pub fn float(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 RuntimeError::Message("float expects a valid number string")
             })?))
         }
+
         other => Err(RuntimeError::TypeError {
             expected: "string",
             got: format!("{:?}", other),
@@ -33,6 +34,7 @@ pub fn int(args: Vec<Value>) -> Result<Value, RuntimeError> {
                 RuntimeError::Message("int expects a valid number string")
             })?))
         }
+
         other => Err(RuntimeError::TypeError {
             expected: "string",
             got: format!("{:?}", other),

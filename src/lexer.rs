@@ -72,6 +72,7 @@ impl Lexer {
     fn consume(&mut self) -> Option<char> {
         let ch = self.peek();
         self.pos += 1;
+
         ch
     }
 
@@ -334,6 +335,7 @@ impl Lexer {
                         '"' => string.push('\"'),
                         '\'' => string.push('\''),
                         '\\' => string.push('\\'),
+
                         _ => {
                             return Err(ScanError {
                                 message: "unsupported escape sequence".to_string(),
@@ -350,6 +352,7 @@ impl Lexer {
 
         match self.consume() {
             Some('"') => {}
+
             _ => {
                 return Err(ScanError {
                     message: "unterminated string".to_string(),

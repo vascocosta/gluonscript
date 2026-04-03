@@ -10,25 +10,32 @@ pub enum Expr {
     String(String),
     Bool(bool),
     Variable(String),
+
     Binary {
         left: Box<Expr>,
         op: Operator,
         right: Box<Expr>,
     },
+
     Call {
         callee: Box<Expr>,
         args: Vec<Expr>,
     },
+
     ListLiteral(Vec<Expr>),
+
     Index {
         target: Box<Expr>,
         index: Box<Expr>,
     },
+
     RecordLiteral(Vec<(String, Expr)>),
+
     Property {
         target: Box<Expr>,
         name: String,
     },
+
     Lambda {
         params: Vec<String>,
         body: Vec<Stmt>,
@@ -303,6 +310,7 @@ impl Expr {
                                 name
                             )))?)
                     }
+
                     _ => Err(RuntimeError::RichMessage(format!(
                         "cannot access: {}, {:?} is not a record",
                         name, target
@@ -325,26 +333,32 @@ pub enum Stmt {
         name: String,
         value: Expr,
     },
+
     Expr(Expr),
+
     If {
         condition: Expr,
         then_branch: Vec<Stmt>,
         else_branch: Vec<Stmt>,
     },
+
     For {
         var: String,
         iterable: Expr,
         body: Vec<Stmt>,
     },
+
     While {
         condition: Expr,
         body: Vec<Stmt>,
     },
+
     Function {
         name: String,
         params: Vec<String>,
         body: Vec<Stmt>,
     },
+
     Return(Expr),
     Break,
     Continue,
@@ -355,7 +369,9 @@ impl Stmt {
         match self {
             Stmt::Assign { name, value } => {
                 let v = value.eval(env)?;
+
                 env.vars.insert(name.clone(), v);
+
                 Ok(ExecResult::Continue)
             }
 
@@ -467,6 +483,7 @@ impl Stmt {
 
             Stmt::Return(expr) => {
                 let value = expr.eval(env)?;
+
                 Ok(ExecResult::Return(value))
             }
 
