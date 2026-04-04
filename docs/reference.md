@@ -36,7 +36,7 @@ Explore the standard library functions.
 ## Module `fs`
 
 [fn read_file(path: String): Record { error: Bool, value: String }](#fn-read_filepath-string-record--error-bool-value-string-)<br>
-[fn write_file(path: String, contents: String): Record { error: Bool, value: None }](#fn-write_filepath-string-contents-string--record--error-bool-value-none-)
+[fn write_file(path: String, contents: String): Record { error: Bool, value: None }](#fn-write_filepath-string-contents-string-record--error-bool-value-none-)
 
 ---
 
