@@ -109,13 +109,19 @@ fn handle_toggle(parsed_cmd, config) {
 		return "Please provide a task id."
 	}
 
+	parsed_id = conv.int(parsed_cmd.args[0])
+
+	if parsed_id.error {
+		return "Invalid task id.\n"
+	}
+
 	tasks =
 		config.db_path
 		|> fs.read_file() |> error.handle_error()
 		|> json.parse() |> error.handle_error()
 
 	for task in tasks {
-		if task.id == conv.int(parsed_cmd.args[0]) {
+		if task.id == parsed_id.value {
 			if task.finished {
 				new_status = false
 			} else {
@@ -134,7 +140,7 @@ fn handle_toggle(parsed_cmd, config) {
 	i = 1
 
 	for task in tasks {
-		if task.id != conv.int(parsed_cmd.args[0]) {
+		if task.id != parsed_id.value {
 			new_tasks = append(new_tasks, {
 				id: i,
 				description: task.description,

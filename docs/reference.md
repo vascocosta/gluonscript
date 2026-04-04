@@ -20,8 +20,8 @@ Explore the standard library functions.
 
 ## Module `conv`
 
-[fn float(string: String): Float](#fn-floatstring-string-float)<br>
-[fn int(string: String): Int](#fn-intstring-string-int)<br>
+[fn float(string: String): Record { error: Bool, value: Float }](#fn-floatstring-string-record--error-bool-value-float-)<br>
+[fn int(string: String): Record { error: Bool, value: Int }](#fn-intstring-string-record--error-bool-value-int-)<br>
 [fn string(any: Any): String](#fn-stringany-any-string)
 
 ---
@@ -105,15 +105,15 @@ Returns a new list containing the elements of the input list between the specifi
 
 ## Module: `conv`
 
-## `fn float(string: String): Float`
+## `fn float(string: String): Record { error: Bool, value: Float }`
 
-Converts the given string into a floating-point number and returns the result. The string must represent a valid numeric value.
+Converts the given string into a floating-point number and returns a result record. The `error` field indicates whether the conversion failed, and the `value` field contains either the floating-point number or an error message.
 
 ---
 
-## `fn int(string: String): Int`
+## `fn int(string: String): Record { error: Bool, value: Int }`
 
-Converts the given string into an integer and returns the result. The string must represent a valid integer value.
+Converts the given string into an integer number and returns a result record. The `error` field indicates whether the conversion failed, and the `value` field contains either the integer number or an error message.
 
 ---
 

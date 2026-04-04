@@ -14,11 +14,16 @@ pub fn module() -> Result<Value, RuntimeError> {
 
 pub fn float(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
-        Some(Value::String(s)) => {
-            Ok(Value::Float(s.trim_ascii().parse().map_err(|_| {
-                RuntimeError::Message("float expects a valid number string")
-            })?))
-        }
+        Some(Value::String(s)) => match s.trim_ascii().parse() {
+            Ok(f) => Ok(Value::Record(HashMap::from([
+                ("error".to_string(), Value::Bool(false)),
+                ("value".to_string(), Value::Float(f)),
+            ]))),
+            Err(e) => Ok(Value::Record(HashMap::from([
+                ("error".to_string(), Value::Bool(true)),
+                ("value".to_string(), Value::String(e.to_string())),
+            ]))),
+        },
 
         other => Err(RuntimeError::TypeError {
             expected: "string",
@@ -29,11 +34,16 @@ pub fn float(args: Vec<Value>) -> Result<Value, RuntimeError> {
 
 pub fn int(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
-        Some(Value::String(s)) => {
-            Ok(Value::Int(s.trim_ascii().parse().map_err(|_| {
-                RuntimeError::Message("int expects a valid number string")
-            })?))
-        }
+        Some(Value::String(s)) => match s.trim_ascii().parse() {
+            Ok(i) => Ok(Value::Record(HashMap::from([
+                ("error".to_string(), Value::Bool(false)),
+                ("value".to_string(), Value::Int(i)),
+            ]))),
+            Err(e) => Ok(Value::Record(HashMap::from([
+                ("error".to_string(), Value::Bool(true)),
+                ("value".to_string(), Value::String(e.to_string())),
+            ]))),
+        },
 
         other => Err(RuntimeError::TypeError {
             expected: "string",
