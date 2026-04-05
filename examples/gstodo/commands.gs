@@ -1,11 +1,11 @@
-conv = import("conv")
-fs = import("fs")
-io = import("io")
-iter = import("iter.gs")
-json = import("json")
-strings = import("strings")
+conv = import("std/conv")
+fs = import("std/fs")
+io = import("std/io")
+iter = import("std/iter")
+json = import("std/json")
+strings = import("std/strings")
 
-error = import("error.gs")
+error = import("error")
 
 fn parse_cmd(cmd) {
 	components = strings.split(cmd, " ")

@@ -1,13 +1,13 @@
 #!/usr/bin/env gluonscript
 
-env = import("env")
-fs = import("fs")
-io = import("io")
-json = import("json")
-strings = import("strings")
+env = import("std/env")
+fs = import("std/fs")
+io = import("std/io")
+json = import("std/json")
+strings = import("std/strings")
 
-commands = import("commands.gs")
-error = import("error.gs")
+commands = import("commands")
+error = import("error")
 
 fn main() {
     config =

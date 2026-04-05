@@ -14,7 +14,7 @@ permalink: /
 A dynamically typed language with the bare minimum features to be enjoyable and simple to use.
 
 ```python
-io = import("io")
+io = import("std/io")
 strings = import("strings")
 
 fn main() {
@@ -62,7 +62,7 @@ The core guiding principle is minimalism, but without making it boringly simple.
 ### Example 1
 
 ```python
-io = import("io")
+io = import("std/io")
 
 fn generic_operation(a, b, operation) {
     operation(a, b)
@@ -92,7 +92,7 @@ Output:
 ### Example 2
 
 ```python
-io = import("io")
+io = import("std/io")
 
 fn even_odd(numbers) {
     even = []
@@ -129,8 +129,8 @@ Output:
 ### Example 3
 
 ```python
-conv = import("conv")
-io = import("io")
+conv = import("std/conv")
+io = import("std/io")
 
 # Define a function that "updates" a user (records are immutable).
 fn birthday(user) {
@@ -172,10 +172,10 @@ Age: 45
 ### Example 4
 
 ```python
-env = import("env")
-http = import("http")
-io = import("io")
-strings = import("strings")
+env = import("std/env")
+http = import("std/http")
+io = import("std/io")
+strings = import("std/strings")
 
 fn get_weather(location) {
     # Get may fail so it returns { "error": Bool, "value": Value }.

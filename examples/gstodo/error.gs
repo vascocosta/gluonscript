@@ -1,4 +1,4 @@
-io = import("io")
+io = import("std/io")
 
 fn handle_error(result) {
     if result.error {

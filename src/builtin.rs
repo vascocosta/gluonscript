@@ -67,16 +67,16 @@ pub fn exit(args: Vec<Value>) -> Result<Value, RuntimeError> {
 pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
         Some(Value::String(s)) => match s.as_str() {
-            "conv" => conv::module(),
-            "env" => env::module(),
-            "fs" => fs::module(),
-            "http" => http::module(),
-            "io" => io::module(),
-            "json" => json::module(),
-            "strings" => strings::module(),
+            "std/conv" => conv::module(),
+            "std/env" => env::module(),
+            "std/fs" => fs::module(),
+            "std/http" => http::module(),
+            "std/io" => io::module(),
+            "std/json" => json::module(),
+            "std/strings" => strings::module(),
 
             _ => {
-                let source = std::fs::read_to_string(s)
+                let source = std::fs::read_to_string(format!("{}.gs", s))
                     .map_err(|_| RuntimeError::Message("import: could not read source file"))?;
 
                 let mut lexer = Lexer::new(&source);
