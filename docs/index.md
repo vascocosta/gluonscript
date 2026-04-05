@@ -15,7 +15,7 @@ A dynamically typed language with the bare minimum features to be enjoyable and 
 
 ```python
 io = import("std/io")
-strings = import("strings")
+strings = import("std/strings")
 
 fn main() {
     list = ["Not", "Yet", "Yellow", "World", "But", "Almost"]
