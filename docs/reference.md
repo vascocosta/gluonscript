@@ -35,6 +35,7 @@ Explore the standard library functions.
 
 ## Module `fs`
 
+[fn create_dir(path: String): Record { error: Bool, value: None }](#fn-create_dirpath-string-record--error-bool-value-none-)<br>
 [fn read_file(path: String): Record { error: Bool, value: String }](#fn-read_filepath-string-record--error-bool-value-string-)<br>
 [fn write_file(path: String, contents: String): Record { error: Bool, value: None }](#fn-write_filepath-string-contents-string-record--error-bool-value-none-)
 
@@ -139,9 +140,17 @@ Returns a record containing all environment variables of the current process as 
 
 ## Module: `fs`
 
+## `fn create_dir(path: String): Record { error: Bool, value: None }`
+
+Creates the directory specified in path in the current directory and returns a result record. The `error` field indicates whether the directory creation operation failed, and the `value` field contains either none or an error message.
+
+---
+
 ## `fn read_file(path: String): Record { error: Bool, value: String }`
 
 Reads the file located at the specified path and returns a result record. The `error` field indicates whether the read operation failed, and the `value` field contains either the file contents as a string or an error message.
+
+---
 
 ## `fn write_file(path: String, contents: String): Record { error: Bool, value: None }`
 
