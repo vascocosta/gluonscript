@@ -1,0 +1,21 @@
+fn filter(list, predicate) {
+    result = []
+
+    for element in list {
+        if predicate(element) {
+            result = append(result, element)
+        }
+    }
+
+    result
+}
+
+fn map(list, f) {
+    result = []
+
+    for element in list {
+        result = append(result, f(element))
+    }
+
+    result
+}
