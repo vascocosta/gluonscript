@@ -1,6 +1,7 @@
 conv = import("conv")
 fs = import("fs")
 io = import("io")
+iter = import("iter.gs")
 json = import("json")
 strings = import("strings")
 
@@ -79,20 +80,9 @@ fn handle_del(parsed_cmd, config) {
 		|> fs.read_file() |> error.handle_error()
 		|> json.parse() |> error.handle_error()
 
-	new_tasks = []
-	i = 1
-
-	for task in tasks {
-		if task.id != conv.int(parsed_cmd.args[0]) {
-			new_tasks = append(new_tasks, {
-				id: i,
-				description: task.description,
-				finished: task.finished
-			})
-
-			i += 1
-		}
-	}
+	new_tasks = iter.filter(tasks, fn (task) {
+		task.id != conv.int(parsed_cmd.args[0])
+	})
 
 	if len(tasks) > len(new_tasks) {
 		fs.write_file(config.db_path, conv.string(new_tasks)) |> error.handle_error()
