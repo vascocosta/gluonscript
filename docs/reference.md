@@ -29,6 +29,7 @@ Explore the standard library functions.
 ## Module `env`
 
 [fn args(): List](#fn-args-list)<br>
+[fn consts(): Record](#fn-consts-record)<br>
 [fn vars(): Record](#fn-vars-record)
 
 ---
@@ -129,6 +130,12 @@ Returns the string representation of the given value.
 ## `fn args(): List`
 
 Returns a list containing all command-line arguments passed to the script, in the order they were provided.
+
+---
+
+## `fn consts(): Record`
+
+Returns a record containing all environment constants of the current process as key/value pairs.
 
 ---
 
