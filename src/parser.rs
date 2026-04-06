@@ -137,22 +137,28 @@ impl Parser {
         if matches!(self.peek(), Some(Token::Else)) {
             self.consume();
 
-            match self.consume() {
-                Some(Token::LBrace) => {}
+            if matches!(self.peek(), Some(Token::If)) {
+                let else_if_stmt = self.parse_if()?;
 
-                _ => {
-                    return Err(ParseError {
-                        message: "expected {{".to_string(),
-                        pos: self.pos,
-                    });
+                else_branch.push(else_if_stmt);
+            } else {
+                match self.consume() {
+                    Some(Token::LBrace) => {}
+
+                    _ => {
+                        return Err(ParseError {
+                            message: "expected {{".to_string(),
+                            pos: self.pos,
+                        });
+                    }
                 }
-            }
 
-            while !matches!(self.peek(), Some(Token::RBrace)) {
-                else_branch.push(self.parse_stmt()?);
-            }
+                while !matches!(self.peek(), Some(Token::RBrace)) {
+                    else_branch.push(self.parse_stmt()?);
+                }
 
-            self.consume();
+                self.consume();
+            }
         }
 
         Ok(Stmt::If {
