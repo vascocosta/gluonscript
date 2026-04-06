@@ -10,8 +10,14 @@ commands = import("commands")
 error = import("error")
 
 fn main() {
+    if env.consts().OS == "windows" {
+        home_folder = env.vars().USERPROFILE
+    } else {
+        home_folder = env.vars().HOME
+    }
+
     config =
-        env.vars().HOME
+        home_folder
         |> append("/" + ".gstodo.json")
         |> fs.read_file() |> error.handle_error()
         |> json.parse() |> error.handle_error()
