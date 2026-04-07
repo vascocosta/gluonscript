@@ -10,6 +10,14 @@ fn filter(list, predicate) {
     result
 }
 
+fn find(list, predicate) {
+    for element in list {
+        if predicate(element) {
+            return element
+        }
+    }
+}
+
 fn map(list, f) {
     result = []
 
