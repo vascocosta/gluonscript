@@ -64,10 +64,19 @@ jobs:
       - name: Prepare Staging Area
         shell: bash
         run: |
-          mkdir -p staging
+          mkdir -p staging/bin
+          mkdir -p staging/std
+
           BINARY_NAME="${{ github.event.repository.name }}"
           [ "${{ matrix.os }}" = "windows-latest" ] && EXT=".exe" || EXT=""
-          cp "target/${{ matrix.target }}/release/$BINARY_NAME$EXT" staging/
+
+          # Copy binary into bin/
+          cp "target/${{ matrix.target }}/release/$BINARY_NAME$EXT" staging/bin/
+
+          # Copy stdlib
+          cp -r std/* staging/std/
+
+          # Copy root files
           cp README.md LICENSE staging/
 
       - name: Create Archive (Unix)
