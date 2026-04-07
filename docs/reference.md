@@ -5,8 +5,11 @@ nav_order: 3
 has_children: true
 ---
 
-## Built-in Functions Reference
+## GluonScript Standard Library
+
 Explore the standard library functions.
+
+---
 
 ## Module `core`
 
@@ -53,6 +56,15 @@ Explore the standard library functions.
 [fn input(): String](#fn-input-string)<br>
 [fn print(any: Any...): None](#fn-printany-any-none)<br>
 [fn println(any: Any...): None](#fn-printlnany-any-none)
+
+---
+
+## Module `iter`
+
+[fn filter(list: List, predicate: fn(e: Any): bool): List](#fn-filterlist-list-predicate-fne-any-bool-list)<br>
+[fn find(list: List, predicate: fn(e: Any): bool): Any](#fn-findlist-list-predicate-fne-any-bool-any)<br>
+[fn map(list: List, f: fn(e: Any): Any): List](#fn-maplist-list-fne-any-any-list)<br>
+[fn take(list: List, n: Int): List](#fn-takelist-list-n-int-list)
 
 ---
 
@@ -190,6 +202,32 @@ Writes the string representation of each provided argument to standard output wi
 ## `fn println(any: Any...): None`
 
 Writes the string representation of each provided argument to standard output, followed by a newline character.
+
+---
+
+## Module: `iter`
+
+## `fn filter(list: List, predicate: fn(e: Any): bool): List`
+
+Returns a new list containing only the elements of the input list for which the predicate function returns `true`. The original list is not modified.
+
+---
+
+## `fn find(list: List, predicate: fn(e: Any): bool): Any`
+
+Returns the first element in the list for which the predicate function returns `true`. If no such element is found, `None` is returned.
+
+---
+
+## `fn map(list: List, f: fn(e: Any): Any): List`
+
+Returns a new list containing the results of applying the given function to each element of the input list. The original list is not modified.
+
+---
+
+## `fn take(list: List, n: Int): List`
+
+Returns a new list containing the first n elements of the input list. If n exceeds the length of the list, all elements are returned. The original list is not modified.
 
 ---
 
