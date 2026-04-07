@@ -63,7 +63,7 @@ Explore the standard library functions.
 
 [fn filter(list: List, predicate: fn(e: Any): bool): List](#fn-filterlist-list-predicate-fne-any-bool-list)<br>
 [fn find(list: List, predicate: fn(e: Any): bool): Any](#fn-findlist-list-predicate-fne-any-bool-any)<br>
-[fn map(list: List, f: fn(e: Any): Any): List](#fn-maplist-list-fne-any-any-list)<br>
+[fn map(list: List, f: fn(e: Any): Any): List](#fn-maplist-list-f-fne-any-any-list)<br>
 [fn take(list: List, n: Int): List](#fn-takelist-list-n-int-list)
 
 ---
