@@ -226,8 +226,6 @@ lisbon: 🌦   +14°C
 
 - Add the location of the `.gluonscript\bin` to your `PATH`.
 
----
-
 ### From source
 
 - Fetch the source code from GitHub by cloning the repo with:
