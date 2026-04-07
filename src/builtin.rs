@@ -6,6 +6,8 @@ mod io;
 mod json;
 mod strings;
 
+use std::io::ErrorKind;
+use std::path::Path;
 use std::process;
 
 use crate::lexer::Lexer;
@@ -67,6 +69,7 @@ pub fn exit(args: Vec<Value>) -> Result<Value, RuntimeError> {
 pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
     match args.first() {
         Some(Value::String(s)) => match s.as_str() {
+            // Handle built-in function cases for which a file does not exist\.
             "std/conv" => conv::module(),
             "std/env" => env::module(),
             "std/fs" => fs::module(),
@@ -75,9 +78,43 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
             "std/json" => json::module(),
             "std/strings" => strings::module(),
 
+            // Handle cases where the imported module is a file stored on the file system.
             _ => {
-                let source = std::fs::read_to_string(format!("{}.gs", s))
-                    .map_err(|_| RuntimeError::Message("import: could not read source file"))?;
+                let source = match std::fs::read_to_string(Path::new(s).with_extension("gs")) {
+                    // The source file was found in the current directory.
+                    Ok(source) => source,
+
+                    // The source file was not found in the current directory.
+                    // Fallback to .gluonscript within the user's home folder.
+                    Err(e) => match e.kind() {
+                        ErrorKind::NotFound => {
+                            let root = if std::env::consts::OS == "windows" {
+                                std::env::var("USERPROFILE")
+                            } else {
+                                std::env::var("HOME")
+                            }
+                            .map_err(|_| {
+                                RuntimeError::Message("import: could not read source file")
+                            })?;
+
+                            std::fs::read_to_string(
+                                Path::new(&root)
+                                    .join(".gluonscript")
+                                    .join(s)
+                                    .with_extension("gs"),
+                            )
+                            .map_err(|_| {
+                                RuntimeError::Message("import: could not read source file")
+                            })?
+                        }
+
+                        _ => {
+                            return Err(RuntimeError::Message(
+                                "import: could not read source file",
+                            ));
+                        }
+                    },
+                };
 
                 let mut lexer = Lexer::new(&source);
                 let tokens = lexer
