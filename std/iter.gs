@@ -19,3 +19,7 @@ fn map(list, f) {
 
     result
 }
+
+fn take(list, n) {
+    slice(list, 0, n)
+}
