@@ -9,9 +9,9 @@ has_children: true
 
 - Fetch the [latest release](https://github.com/vascocosta/gluonscript/releases) for your platform from GitHub.
 
-- Extract the archive into a location of your choosing.
+- Extract the archive into a `.gluonscript` folder at the root of your `HOME` folder.
 
-- Add the location of the `gluonscript` binary to your `PATH`.
+- Add the location of the `.gluonscript\bin` to your `PATH`.
 
 ---
 
@@ -29,8 +29,6 @@ git clone https://github.com/vascocosta/gluonscript.git
 cd gluonscript
 cargo build -r
 ```
-
-- Add the location of the `gluonscript` binary to your `PATH`.
 
 ---
 
