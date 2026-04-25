@@ -50,6 +50,7 @@ pub enum Token {
     True,
     False,
     Pipe,
+    QuestionEquals,
 }
 
 pub struct Lexer {
@@ -172,6 +173,20 @@ impl Lexer {
                         tokens.push(Token::EqualEqual);
                     } else {
                         tokens.push(Token::Equals)
+                    }
+                }
+
+                '?' => {
+                    self.consume();
+
+                    if self.peek() == Some('=') {
+                        self.consume();
+                        tokens.push(Token::QuestionEquals);
+                    } else {
+                        return Err(ScanError {
+                            message: format!("unexpected character {}", c),
+                            pos: self.pos,
+                        });
                     }
                 }
 

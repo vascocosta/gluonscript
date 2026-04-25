@@ -51,6 +51,7 @@ impl Parser {
 
             Some(Token::Ident(_)) => match self.peek_next() {
                 Some(Token::Equals) => self.parse_assign(),
+                Some(Token::QuestionEquals) => self.parse_question_assign(),
                 Some(Token::PlusEquals) => self.parse_op_assign(Operator::Add),
                 Some(Token::MinusEquals) => self.parse_op_assign(Operator::Sub),
                 Some(Token::StarEquals) => self.parse_op_assign(Operator::Mul),
@@ -80,6 +81,25 @@ impl Parser {
         let value = self.parse_expr(0)?;
 
         Ok(Stmt::Assign { name, value })
+    }
+
+    fn parse_question_assign(&mut self) -> Result<Stmt, ParseError> {
+        let name = match self.consume() {
+            Some(Token::Ident(n)) => n,
+
+            _ => {
+                return Err(ParseError {
+                    message: "expected identifier".to_string(),
+                    pos: self.pos,
+                });
+            }
+        };
+
+        self.consume();
+
+        let value = self.parse_expr(0)?;
+
+        Ok(Stmt::TryAssign { name, value })
     }
 
     fn parse_op_assign(&mut self, op: Operator) -> Result<Stmt, ParseError> {

@@ -334,6 +334,11 @@ pub enum Stmt {
         value: Expr,
     },
 
+    TryAssign {
+        name: String,
+        value: Expr,
+    },
+
     Expr(Expr),
 
     If {
@@ -373,6 +378,42 @@ impl Stmt {
                 env.vars.insert(name.clone(), v);
 
                 Ok(ExecResult::Continue)
+            }
+
+            Stmt::TryAssign { name, value } => {
+                let v = value.eval(env)?;
+
+                match v {
+                    Value::Record(map) => {
+                        let error = map
+                            .get("error")
+                            .ok_or(RuntimeError::RichMessage("missing error field".to_string()))?;
+
+                        let value = map
+                            .get("value")
+                            .ok_or(RuntimeError::RichMessage("missing error field".to_string()))?;
+
+                        match error {
+                            Value::Bool(false) => {
+                                env.set(name.to_string(), value.clone());
+
+                                Ok(ExecResult::Continue)
+                            }
+
+                            Value::Bool(true) => Ok(ExecResult::Return(Value::Record(map))),
+
+                            _ => Err(RuntimeError::RichMessage(
+                                "error field must be bool".to_string(),
+                            )),
+                        }
+                    }
+
+                    _ => {
+                        return Err(RuntimeError::RichMessage(
+                            "?= expects a record on the right side".to_string(),
+                        ));
+                    }
+                }
             }
 
             Stmt::Expr(expr) => Ok(ExecResult::Value(expr.eval(env)?)),
