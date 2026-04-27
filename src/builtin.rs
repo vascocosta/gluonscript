@@ -190,3 +190,68 @@ pub fn slice(args: Vec<Value>) -> Result<Value, RuntimeError> {
         }),
     }
 }
+
+pub fn update(mut args: Vec<Value>) -> Result<Value, RuntimeError> {
+    if args.len() != 3 {
+        return Err(RuntimeError::Arity {
+            expected: 3,
+            got: args.len(),
+        });
+    }
+
+    let new_value = args.pop().ok_or(RuntimeError::Arity {
+        expected: 3,
+        got: args.len(),
+    })?;
+
+    match args.pop() {
+        Some(Value::Int(index)) => match args.pop() {
+            Some(Value::List(mut values)) => {
+                if index < 0 || index as usize >= values.len() {
+                    return Err(RuntimeError::Message("index out of bounds"));
+                }
+
+                values[index as usize] = new_value;
+
+                Ok(Value::List(values))
+            }
+
+            Some(other) => Err(RuntimeError::TypeError {
+                expected: "list",
+                got: other.to_string(),
+            }),
+
+            None => Err(RuntimeError::Arity {
+                expected: 3,
+                got: args.len(),
+            }),
+        },
+
+        Some(Value::String(key)) => match args.pop() {
+            Some(Value::Record(mut map)) => {
+                if !map.contains_key(&key) {
+                    return Err(RuntimeError::Message("unknown key"));
+                }
+
+                map.insert(key, new_value);
+
+                Ok(Value::Record(map))
+            }
+
+            Some(other) => Err(RuntimeError::TypeError {
+                expected: "record",
+                got: other.to_string(),
+            }),
+
+            None => Err(RuntimeError::Arity {
+                expected: 3,
+                got: args.len(),
+            }),
+        },
+
+        _ => Err(RuntimeError::TypeError {
+            expected: "int/string",
+            got: "unsuported index/key".to_string(),
+        }),
+    }
+}

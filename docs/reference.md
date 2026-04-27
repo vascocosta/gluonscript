@@ -18,6 +18,7 @@ Explore the standard library functions.
 [fn import(file: String): Record](#fn-importfile-string-record)<br>
 [fn len(list: List): Int](#fn-lenlist-list-int)<br>
 [fn slice(list: List, start: Int, end: Int): List](#fn-slicelist-list-start-int-end-int-list)
+[fn update(collection: List | Record, element: Int | String, value: Any): List | Record]()
 
 ---
 
@@ -114,6 +115,13 @@ Returns the number of elements contained in the given list.
 ## `fn slice(list: List, start: Int, end: Int): List`
 
 Returns a new list containing the elements of the input list between the specified start index (inclusive) and end index (exclusive). The original list is not modified.
+
+---
+
+## `fn update(collection: List | Record, element: Int | String, value: Any): List | Record`
+
+Returns a new collection containing the same elements of the collection passed as first argument, which can be either
+a list or a record, but with the element at the list index or record field specified by element replaced by value.
 
 ---
 
