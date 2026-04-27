@@ -17,8 +17,8 @@ Explore the standard library functions.
 [fn exit(code: Int): None](#fn-exitint-none)<br>
 [fn import(file: String): Record](#fn-importfile-string-record)<br>
 [fn len(list: List): Int](#fn-lenlist-list-int)<br>
-[fn slice(list: List, start: Int, end: Int): List](#fn-slicelist-list-start-int-end-int-list)
-[fn update(collection: List | Record, element: Int | String, value: Any): List | Record]()
+[fn slice(list: List, start: Int, end: Int): List](#fn-slicelist-list-start-int-end-int-list)<br>
+[fn update(collection: List | Record, element: Int | String, value: Any): List | Record](#fn-updatecollection-list--record-element-int--string-value-any-list--record)
 
 ---
 
