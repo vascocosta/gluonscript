@@ -84,7 +84,7 @@ impl Expr {
                 }
 
                 let l = left.eval(env.clone())?;
-                let r = right.eval(env.clone())?;
+                let r = right.eval(env)?;
 
                 match (l, r, op) {
                     // Operator::Add
@@ -269,7 +269,7 @@ impl Expr {
                 let args: Result<Vec<Value>, RuntimeError> =
                     args.iter().map(|a| a.eval(env.clone())).collect();
 
-                let func_val = callee.eval(env.clone())?;
+                let func_val = callee.eval(env)?;
 
                 func_val.call(args?)
             }
@@ -283,7 +283,7 @@ impl Expr {
 
             Expr::Index { target, index } => {
                 let list = target.eval(env.clone())?;
-                let idx = index.eval(env.clone())?;
+                let idx = index.eval(env)?;
 
                 match (list, idx) {
                     (Value::List(v), Value::Int(i)) => Ok(v
@@ -306,7 +306,7 @@ impl Expr {
             }
 
             Expr::Property { target, name } => {
-                let record = target.eval(env.clone())?;
+                let record = target.eval(env)?;
 
                 match record {
                     Value::Record(map) => {
@@ -329,7 +329,7 @@ impl Expr {
             Expr::Lambda { params, body } => Ok(Value::Function(Function {
                 params: params.clone(),
                 body: body.clone(),
-                env: env.clone(),
+                env: env,
             })),
         }
     }
@@ -424,7 +424,7 @@ impl Stmt {
                 }
             }
 
-            Stmt::Expr(expr) => Ok(ExecResult::Value(expr.eval(env.clone())?)),
+            Stmt::Expr(expr) => Ok(ExecResult::Value(expr.eval(env)?)),
 
             Stmt::If {
                 condition,
@@ -531,7 +531,7 @@ impl Stmt {
             }
 
             Stmt::Return(expr) => {
-                let value = expr.eval(env.clone())?;
+                let value = expr.eval(env)?;
 
                 Ok(ExecResult::Return(value))
             }

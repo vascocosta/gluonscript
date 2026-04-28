@@ -46,7 +46,7 @@ impl Value {
     pub fn call(&self, args: Vec<Value>) -> Result<Value, RuntimeError> {
         match self {
             Value::Function(func) => {
-                let local_env = func.env.borrow().child();
+                let local_env = func.env.borrow().clone().child();
 
                 for (param, value) in func.params.iter().zip(args) {
                     local_env.borrow_mut().set(param.clone(), value);
@@ -119,7 +119,7 @@ pub struct Function {
 #[derive(Clone, Debug)]
 pub struct Env {
     pub vars: HashMap<String, Value>,
-    pub parent: Option<Box<Env>>,
+    pub parent: Option<Box<Rc<RefCell<Env>>>>,
 }
 
 impl Env {
@@ -130,10 +130,10 @@ impl Env {
         }
     }
 
-    pub fn child(&self) -> Rc<RefCell<Self>> {
+    pub fn child(self) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
             vars: HashMap::new(),
-            parent: Some(Box::new(self.clone())),
+            parent: Some(Box::new(Rc::new(RefCell::new(self)))),
         }))
     }
 
@@ -143,7 +143,7 @@ impl Env {
         }
 
         if let Some(parent) = &self.parent {
-            return parent.get_vars(name);
+            return parent.borrow().get_vars(name);
         }
 
         None
