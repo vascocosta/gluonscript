@@ -6,9 +6,11 @@ mod io;
 mod json;
 mod strings;
 
+use std::cell::RefCell;
 use std::io::ErrorKind;
 use std::path::Path;
 use std::process;
+use std::rc::Rc;
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;
@@ -126,16 +128,16 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
                     .parse_program()
                     .map_err(|_| RuntimeError::Message("import: could not parse program"))?;
 
-                let mut env = Env::new();
+                let env = Rc::new(RefCell::new(Env::new()));
 
-                env.prelude();
+                env.borrow_mut().prelude();
 
                 for stmt in &program.statements {
-                    stmt.exec(&mut env)
+                    stmt.exec(env.clone())
                         .map_err(|_| RuntimeError::Message("import: could not tokenize source"))?;
                 }
 
-                Ok(Value::Record(env.vars))
+                Ok(Value::Record(env.borrow().vars.clone()))
             }
         },
 

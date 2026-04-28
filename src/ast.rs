@@ -1,4 +1,6 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use crate::operators::Operator;
 use crate::runtime::{Env, Function, RuntimeError, Value};
@@ -43,27 +45,33 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn eval(&self, env: &Env) -> Result<Value, RuntimeError> {
+    pub fn eval(&self, env: Rc<RefCell<Env>>) -> Result<Value, RuntimeError> {
         match self {
             Expr::Int(n) => Ok(Value::Int(*n)),
             Expr::Float(n) => Ok(Value::Float(*n)),
             Expr::String(s) => Ok(Value::String(s.to_owned())),
             Expr::Bool(b) => Ok(Value::Bool(*b)),
 
-            Expr::Variable(name) => Ok(env.get_vars(name).ok_or(RuntimeError::RichMessage(
-                format!("undefined variable: {}", name),
-            ))?),
+            Expr::Variable(name) => {
+                Ok(env
+                    .borrow()
+                    .get_vars(name)
+                    .ok_or(RuntimeError::RichMessage(format!(
+                        "undefined variable: {}",
+                        name
+                    )))?)
+            }
 
             Expr::Binary { left, op, right } => {
                 if let Operator::Pipe = op {
-                    let l = left.eval(env)?;
+                    let l = left.eval(env.clone())?;
 
                     match &**right {
                         Expr::Call { callee, args } => {
                             let mut values = vec![l];
 
                             for arg in args {
-                                values.push(arg.eval(env)?);
+                                values.push(arg.eval(env.clone())?);
                             }
 
                             let func_val = callee.eval(env)?;
@@ -75,8 +83,8 @@ impl Expr {
                     }
                 }
 
-                let l = left.eval(env)?;
-                let r = right.eval(env)?;
+                let l = left.eval(env.clone())?;
+                let r = right.eval(env.clone())?;
 
                 match (l, r, op) {
                     // Operator::Add
@@ -259,23 +267,23 @@ impl Expr {
 
             Expr::Call { callee, args } => {
                 let args: Result<Vec<Value>, RuntimeError> =
-                    args.iter().map(|a| a.eval(env)).collect();
+                    args.iter().map(|a| a.eval(env.clone())).collect();
 
-                let func_val = callee.eval(env)?;
+                let func_val = callee.eval(env.clone())?;
 
                 func_val.call(args?)
             }
 
             Expr::ListLiteral(elements) => {
                 let values: Result<Vec<Value>, RuntimeError> =
-                    elements.iter().map(|e| e.eval(env)).collect();
+                    elements.iter().map(|e| e.eval(env.clone())).collect();
 
                 Ok(Value::List(values?))
             }
 
             Expr::Index { target, index } => {
-                let list = target.eval(env)?;
-                let idx = index.eval(env)?;
+                let list = target.eval(env.clone())?;
+                let idx = index.eval(env.clone())?;
 
                 match (list, idx) {
                     (Value::List(v), Value::Int(i)) => Ok(v
@@ -291,14 +299,14 @@ impl Expr {
                 let mut map = HashMap::new();
 
                 for (k, v) in fields {
-                    map.insert(k.clone(), v.eval(env)?);
+                    map.insert(k.clone(), v.eval(env.clone())?);
                 }
 
                 Ok(Value::Record(map))
             }
 
             Expr::Property { target, name } => {
-                let record = target.eval(env)?;
+                let record = target.eval(env.clone())?;
 
                 match record {
                     Value::Record(map) => {
@@ -370,18 +378,18 @@ pub enum Stmt {
 }
 
 impl Stmt {
-    pub fn exec(&self, env: &mut Env) -> Result<ExecResult, RuntimeError> {
+    pub fn exec(&self, env: Rc<RefCell<Env>>) -> Result<ExecResult, RuntimeError> {
         match self {
             Stmt::Assign { name, value } => {
-                let v = value.eval(env)?;
+                let v = value.eval(env.clone())?;
 
-                env.vars.insert(name.clone(), v);
+                env.borrow_mut().vars.insert(name.clone(), v);
 
                 Ok(ExecResult::Continue)
             }
 
             Stmt::TryAssign { name, value } => {
-                let v = value.eval(env)?;
+                let v = value.eval(env.clone())?;
 
                 match v {
                     Value::Record(map) => {
@@ -395,7 +403,7 @@ impl Stmt {
 
                         match error {
                             Value::Bool(false) => {
-                                env.set(name.to_string(), value.clone());
+                                env.borrow_mut().set(name.to_string(), value.clone());
 
                                 Ok(ExecResult::Continue)
                             }
@@ -416,25 +424,25 @@ impl Stmt {
                 }
             }
 
-            Stmt::Expr(expr) => Ok(ExecResult::Value(expr.eval(env)?)),
+            Stmt::Expr(expr) => Ok(ExecResult::Value(expr.eval(env.clone())?)),
 
             Stmt::If {
                 condition,
                 then_branch,
                 else_branch,
             } => {
-                let cond = condition.eval(env)?;
+                let cond = condition.eval(env.clone())?;
 
                 if let Value::Bool(true) = cond {
                     for stmt in then_branch {
-                        match stmt.exec(env)? {
+                        match stmt.exec(env.clone())? {
                             ExecResult::Continue | ExecResult::Value(_) => {}
                             other => return Ok(other),
                         }
                     }
                 } else {
                     for stmt in else_branch {
-                        match stmt.exec(env)? {
+                        match stmt.exec(env.clone())? {
                             ExecResult::Continue | ExecResult::Value(_) => {}
                             other => return Ok(other),
                         }
@@ -449,15 +457,15 @@ impl Stmt {
                 iterable,
                 body,
             } => {
-                let value = iterable.eval(env)?;
+                let value = iterable.eval(env.clone())?;
 
                 match value {
                     Value::List(items) => {
                         for item in items {
-                            env.set(var.clone(), item);
+                            env.borrow_mut().set(var.clone(), item);
 
                             for stmt in body {
-                                match stmt.exec(env)? {
+                                match stmt.exec(env.clone())? {
                                     ExecResult::Continue => {}
                                     ExecResult::Break => return Ok(ExecResult::Continue),
                                     ExecResult::LoopContinue => break,
@@ -481,12 +489,12 @@ impl Stmt {
 
             Stmt::While { condition, body } => {
                 loop {
-                    let cond = condition.eval(env)?;
+                    let cond = condition.eval(env.clone())?;
 
                     match cond {
                         Value::Bool(true) => {
                             for stmt in body {
-                                match stmt.exec(env)? {
+                                match stmt.exec(env.clone())? {
                                     ExecResult::Continue => {}
                                     ExecResult::Break => return Ok(ExecResult::Continue),
                                     ExecResult::LoopContinue => break,
@@ -517,13 +525,13 @@ impl Stmt {
                     env: env.clone(),
                 };
 
-                env.set(name.clone(), Value::Function(func));
+                env.borrow_mut().set(name.clone(), Value::Function(func));
 
                 Ok(ExecResult::Continue)
             }
 
             Stmt::Return(expr) => {
-                let value = expr.eval(env)?;
+                let value = expr.eval(env.clone())?;
 
                 Ok(ExecResult::Return(value))
             }
