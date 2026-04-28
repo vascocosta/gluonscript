@@ -119,7 +119,7 @@ pub struct Function {
 #[derive(Clone, Debug)]
 pub struct Env {
     pub vars: HashMap<String, Value>,
-    pub parent: Option<Box<Rc<RefCell<Env>>>>,
+    pub parent: Option<Rc<RefCell<Env>>>,
 }
 
 impl Env {
@@ -133,7 +133,7 @@ impl Env {
     pub fn child(self) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
             vars: HashMap::new(),
-            parent: Some(Box::new(Rc::new(RefCell::new(self)))),
+            parent: Some(Rc::new(RefCell::new(self))),
         }))
     }
 
