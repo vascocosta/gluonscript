@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
 use crate::{
     ast::{ExecResult, Stmt},
@@ -46,16 +46,16 @@ impl Value {
     pub fn call(&self, args: Vec<Value>) -> Result<Value, RuntimeError> {
         match self {
             Value::Function(func) => {
-                let mut local_env = func.env.child();
+                let local_env = func.env.borrow().clone().child();
 
                 for (param, value) in func.params.iter().zip(args) {
-                    local_env.set(param.clone(), value);
+                    local_env.borrow_mut().set(param.clone(), value);
                 }
 
                 let mut result = Value::None;
 
                 for stmt in &func.body {
-                    match stmt.exec(&mut local_env)? {
+                    match stmt.exec(local_env.clone())? {
                         ExecResult::Continue => {}
                         ExecResult::Break => {}
                         ExecResult::LoopContinue => {}
@@ -113,13 +113,13 @@ impl Display for Value {
 pub struct Function {
     pub params: Vec<String>,
     pub body: Vec<Stmt>,
-    pub env: Env,
+    pub env: Rc<RefCell<Env>>,
 }
 
 #[derive(Clone, Debug)]
 pub struct Env {
     pub vars: HashMap<String, Value>,
-    pub parent: Option<Box<Env>>,
+    pub parent: Option<Rc<RefCell<Env>>>,
 }
 
 impl Env {
@@ -130,11 +130,11 @@ impl Env {
         }
     }
 
-    pub fn child(&self) -> Self {
-        Self {
+    pub fn child(self) -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(Self {
             vars: HashMap::new(),
-            parent: Some(Box::new(self.clone())),
-        }
+            parent: Some(Rc::new(RefCell::new(self))),
+        }))
     }
 
     pub fn get_vars(&self, name: &str) -> Option<Value> {
@@ -143,7 +143,7 @@ impl Env {
         }
 
         if let Some(parent) = &self.parent {
-            return parent.get_vars(name);
+            return parent.borrow().get_vars(name);
         }
 
         None
