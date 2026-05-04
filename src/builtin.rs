@@ -9,8 +9,8 @@ mod strings;
 use std::cell::RefCell;
 use std::io::ErrorKind;
 use std::path::Path;
+use std::process;
 use std::rc::Rc;
-use std::{mem, process};
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;
@@ -137,9 +137,9 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
                         .map_err(|_| RuntimeError::Message("import: could not tokenize source"))?;
                 }
 
-                let mut env_ref = env.borrow_mut();
+                let env_ref = env.borrow();
 
-                Ok(Value::Record(mem::take(&mut env_ref.vars)))
+                Ok(Value::Record(env_ref.vars.clone()))
             }
         },
 
