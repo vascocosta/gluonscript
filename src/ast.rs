@@ -384,9 +384,7 @@ impl Stmt {
                 let v = value.eval(env.clone())?;
                 let mut env_ref = env.borrow_mut();
 
-                if !env_ref.assign(name, v.clone()) {
-                    env_ref.vars.insert(name.clone(), v);
-                }
+                env_ref.vars.insert(name.clone(), v);
 
                 Ok(ExecResult::Continue)
             }
@@ -408,9 +406,7 @@ impl Stmt {
                             Value::Bool(false) => {
                                 let mut env_ref = env.borrow_mut();
 
-                                if !env_ref.assign(name, value.clone()) {
-                                    env_ref.vars.insert(name.clone(), value.clone());
-                                }
+                                env_ref.vars.insert(name.clone(), value.clone());
 
                                 Ok(ExecResult::Continue)
                             }

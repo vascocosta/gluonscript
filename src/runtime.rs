@@ -130,19 +130,6 @@ impl Env {
         }
     }
 
-    pub fn assign(&mut self, name: &str, value: Value) -> bool {
-        if self.vars.contains_key(name) {
-            self.vars.insert(name.to_string(), value);
-            return true;
-        }
-
-        if let Some(parent) = &self.parent {
-            return parent.borrow_mut().assign(name, value);
-        }
-
-        false
-    }
-
     pub fn child(env: Rc<RefCell<Env>>) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
             vars: HashMap::new(),
