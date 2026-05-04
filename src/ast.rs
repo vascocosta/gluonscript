@@ -382,8 +382,11 @@ impl Stmt {
         match self {
             Stmt::Assign { name, value } => {
                 let v = value.eval(env.clone())?;
+                let mut env_ref = env.borrow_mut();
 
-                env.borrow_mut().vars.insert(name.clone(), v);
+                if !env_ref.assign(name, v.clone()) {
+                    env_ref.vars.insert(name.clone(), v);
+                }
 
                 Ok(ExecResult::Continue)
             }
