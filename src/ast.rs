@@ -406,7 +406,11 @@ impl Stmt {
 
                         match error {
                             Value::Bool(false) => {
-                                env.borrow_mut().set(name.to_string(), value.clone());
+                                let mut env_ref = env.borrow_mut();
+
+                                if !env_ref.assign(name, value.clone()) {
+                                    env_ref.vars.insert(name.clone(), value.clone());
+                                }
 
                                 Ok(ExecResult::Continue)
                             }
