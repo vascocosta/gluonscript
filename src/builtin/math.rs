@@ -7,9 +7,11 @@ pub fn module() -> Result<Value, RuntimeError> {
 
     map.insert("abs".to_string(), Value::BuiltinFunction(abs));
     map.insert("ceil".to_string(), Value::BuiltinFunction(ceil));
+    map.insert("cos".to_string(), Value::BuiltinFunction(cos));
     map.insert("clamp".to_string(), Value::BuiltinFunction(clamp));
     map.insert("floor".to_string(), Value::BuiltinFunction(floor));
     map.insert("round".to_string(), Value::BuiltinFunction(round));
+    map.insert("sin".to_string(), Value::BuiltinFunction(sin));
 
     Ok(Value::Record(map))
 }
@@ -56,6 +58,30 @@ pub fn ceil(args: Vec<Value>) -> Result<Value, RuntimeError> {
 
         other => Err(RuntimeError::TypeError {
             expected: "float",
+            got: format!("{:?}", other),
+        }),
+    }
+}
+
+pub fn cos(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    if args.len() != 1 {
+        return Err(RuntimeError::Arity {
+            expected: 1,
+            got: args.len(),
+        });
+    }
+
+    match args.first() {
+        Some(Value::Float(number)) => Ok(Value::Float(number.cos())),
+        Some(Value::Int(number)) => Ok(Value::Float((*number as f64).cos())),
+
+        None => Err(RuntimeError::Arity {
+            expected: 1,
+            got: 0,
+        }),
+
+        other => Err(RuntimeError::TypeError {
+            expected: "float/int",
             got: format!("{:?}", other),
         }),
     }
@@ -207,6 +233,30 @@ pub fn round(args: Vec<Value>) -> Result<Value, RuntimeError> {
 
         other => Err(RuntimeError::TypeError {
             expected: "float",
+            got: format!("{:?}", other),
+        }),
+    }
+}
+
+pub fn sin(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    if args.len() != 1 {
+        return Err(RuntimeError::Arity {
+            expected: 1,
+            got: args.len(),
+        });
+    }
+
+    match args.first() {
+        Some(Value::Float(number)) => Ok(Value::Float(number.sin())),
+        Some(Value::Int(number)) => Ok(Value::Float((*number as f64).sin())),
+
+        None => Err(RuntimeError::Arity {
+            expected: 1,
+            got: 0,
+        }),
+
+        other => Err(RuntimeError::TypeError {
+            expected: "float/int",
             got: format!("{:?}", other),
         }),
     }

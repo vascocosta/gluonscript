@@ -79,9 +79,11 @@ Explore the standard library functions.
 
 [fn abs(number: Int | Float): Int | Float](#fn-absnumber-int--float-int--float)<br>
 [fn ceil(number: Float): Float](#fn-ceilnumber-float-float)<br>
+[fn cos(number: Int | Float): Float](#fn-cosnumber-int--float-float)<br>
 [fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float](#fn-clampvalue-int--float-min-int--float-max-int--float-int--float)<br>
 [fn floor(number: Float): Float](#fn-floornumber-float-float)<br>
-[fn round(number: Float): Float](#fn-roundnumber-float-float)
+[fn round(number: Float): Float](#fn-roundnumber-float-float)<br>
+[fn sin(number: Int | Float): Float](#fn-sinnumber-int--float-float)
 
 ---
 
@@ -271,6 +273,14 @@ Returns the smallest integer value greater than or equal to the given floating-p
 
 ---
 
+## `fn cos(number: Int | Float): Float`
+
+Returns the cosine of the given angle, expressed in radians.
+
+If the input is an integer, it is converted to a floating-point number before the calculation is performed.
+
+---
+
 ## `fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float`
 
 Restricts the given value to be within the inclusive range defined by `min` and `max`.
@@ -292,6 +302,14 @@ Returns the largest integer value less than or equal to the given floating-point
 ## `fn round(number: Float): Float`
 
 Returns the nearest integer value to the given floating-point number, as a floating-point value. Halfway cases are rounded away from zero.
+
+---
+
+## `fn sin(number: Int | Float): Float`
+
+Returns the sine of the given angle, expressed in radians.
+
+If the input is an integer, it is converted to a floating-point number before the calculation is performed.
 
 ---
 
