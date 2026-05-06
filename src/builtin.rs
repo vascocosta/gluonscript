@@ -4,6 +4,7 @@ mod fs;
 mod http;
 mod io;
 mod json;
+mod math;
 mod strings;
 
 use std::cell::RefCell;
@@ -78,6 +79,7 @@ pub fn import(args: Vec<Value>) -> Result<Value, RuntimeError> {
             "std/http" => http::module(),
             "std/io" => io::module(),
             "std/json" => json::module(),
+            "std/math" => math::module(),
             "std/strings" => strings::module(),
 
             // Handle cases where the imported module is a file stored on the file system.

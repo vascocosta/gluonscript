@@ -75,6 +75,16 @@ Explore the standard library functions.
 
 ---
 
+## Module `math`
+
+[fn abs(number: Int | Float): Int | Float](#fn-absnumber-int--float-int--float)<br>
+[fn ceil(number: Float): Float](#fn-ceilnumber-float-float)<br>
+[fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float](#fn-clampvalue-int--float-min-int--float-max-int--float-int--float)<br>
+[fn floor(number: Float): Float](#fn-floornumber-float-float)<br>
+[fn round(number: Float): Float](#fn-roundnumber-float-float)
+
+---
+
 ## Module `strings`
 
 [fn contains(string: String, substr: String): Bool](#fn-containsstring-string-substr-string-bool)<br>
@@ -244,6 +254,44 @@ Returns a new list containing the first n elements of the input list. If n excee
 ## `fn parse(json: String): Record { error: Bool, value: Record }`
 
 Parses the given JSON string and returns a result record. The `error` field indicates whether parsing failed, and the `value` field contains either the parsed JSON value as a record or an error message.
+
+---
+
+## Module: `math`
+
+## `fn abs(number: Int | Float): Int | Float`
+
+Returns the absolute value of the given number. If the input is an integer, an integer is returned. If the input is a floating-point number, a floating-point number is returned.
+
+---
+
+## `fn ceil(number: Float): Float`
+
+Returns the smallest integer value greater than or equal to the given floating-point number, as a floating-point value.
+
+---
+
+## `fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float`
+
+Restricts the given value to be within the inclusive range defined by `min` and `max`.
+
+If the value is less than `min`, `min` is returned.  
+If the value is greater than `max`, `max` is returned.  
+Otherwise, the original value is returned.
+
+All arguments must be of the same type (either all integers or all floating-point numbers).
+
+---
+
+## `fn floor(number: Float): Float`
+
+Returns the largest integer value less than or equal to the given floating-point number, as a floating-point value.
+
+---
+
+## `fn round(number: Float): Float`
+
+Returns the nearest integer value to the given floating-point number, as a floating-point value. Halfway cases are rounded away from zero.
 
 ---
 
