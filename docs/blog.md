@@ -1,17 +1,17 @@
 ---
 layout: default
-title: "GluonScript 0.4.0 released"
+title: "Blog"
 nav_order: 4
 has_children: true
 ---
 
-# GluonScript 0.4.0
+# GluonScript 0.4.0 released
 
 GluonScript 0.4.0 introduces several important improvements to the language and runtime. This release focuses on making error handling more ergonomic, expanding the standard functionality available to programs and improving interpreter performance and closure semantics internally.
 
-## `?=` Error Propagation Operator
+## Error Propagation Operator `?=`
 
-One of the biggest additions in this release is the new `?=` operator.
+One of the biggest additions of this release is the new `?=` operator.
 
 Functions that may fail in GluonScript commonly return a record in the following format:
 
@@ -49,14 +49,14 @@ This feature was heavily inspired by Rust's `?` operator while still fitting nat
 
 Version 0.4.0 also introduces a new built-in `math` module containing common mathematical functionality:
 
-`fn abs(number: Int | Float): Int | Float`
-`fn ceil(number: Float): Float`
-`fn cos(number: Int | Float): Float`
-`fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float`
-`fn floor(number: Float): Float`
-`fn max(a: Int | Float, b: Int | Float): Int | Float`
-`fn min(a: Int | Float, b: Int | Float): Int | Float`
-`fn round(number: Float): Float`
+`fn abs(number: Int | Float): Int | Float`<br>
+`fn ceil(number: Float): Float`<br>
+`fn cos(number: Int | Float): Float`<br>
+`fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float`<br>
+`fn floor(number: Float): Float`<br>
+`fn max(a: Int | Float, b: Int | Float): Int | Float`<br>
+`fn min(a: Int | Float, b: Int | Float): Int | Float`<br>
+`fn round(number: Float): Float`<br>
 `fn sin(number: Int | Float): Float`
 
 The goal of this module is to provide convenient access to frequently used mathematical operations without requiring external dependencies.
