@@ -18,20 +18,17 @@ io = import("std/io")
 strings = import("std/strings")
 
 fn main() {
-    list = ["Not", "Yet", "Yellow", "World", "But", "Almost"]
+    message =
+        "hello world"
+        |> strings.upper()
+        |> append("!")
 
-    text = list
-        |> slice(2, len(list) - 2) # Slice the list to get rid of extra words.
-        |> strings.join(" ") # Create a string by joining words from the list.
-        |> strings.replace("Yellow", "Hello") # Fix the typo (Yellow > Hello).
-        |> append("!") # Finally append !, although the + operator also works.
-
-    io.println(text)
+    io.println(message)
 }
 ```
 
 ```
-Hello World!
+HELLO WORLD!
 ```
 
 ## Philosophy
@@ -42,20 +39,17 @@ The core guiding principle is minimalism, but without making it boringly simple.
 
 ## Features
 
-* Minimalist but ergonomic and consistent syntax
-* Lists (immutable Python-like lists)
-* Records (immutable Javascript-like objects)
-* First-class functions
-* Lambdas
-* Closures
-* Function pipe operator
+* Minimalist, ergonomic and consistent syntax
+* Immutable Python-like lists
+* Immutable JavaScript-like records
+* First-class functions, lambdas and closures
+* Function pipe operator (`|>`)
 * Easy collection iteration
-* Functions that might fail return { "error": Bool, "value": Value }
-* One single way to do things
-* Rich built-in std library
-* Balanced imperative/functional style
-* Ideal for new and experienced programmers
-* Implemented in Rust taking advantage of its ownership model (no GC)
+* Lightweight error propagation with `?=`
+* Rich standard library
+* Balanced imperative and functional style
+* Friendly to both new and experienced programmers
+* Implemented in Rust without a garbage collector
 
 ## Examples
 
@@ -129,56 +123,13 @@ Output:
 ### Example 3
 
 ```python
-conv = import("std/conv")
-io = import("std/io")
-
-# Define a function that "updates" a user (records are immutable).
-fn birthday(user) {
-    return {
-        name: user.name,
-        age: user.age + 1
-    }
-}
-
-# Create a record.
-user = {
-    name: "Vasco",
-    age: 44
-}
-
-io.println("User:")
-io.println("Name: " + user.name)
-io.println("Age: " + conv.string(user.age))
-
-# Create a new updated record.
-updated = birthday(user)
-
-io.println()
-io.println("After birthday:")
-io.println("Name: " + updated.name)
-io.println("Age: " + conv.string(updated.age))
-```
-
-```
-User:
-Name: Vasco
-Age: 44
-
-After birthday:
-Name: Vasco
-Age: 45
-```
-
-### Example 4
-
-```python
 env = import("std/env")
 http = import("std/http")
 io = import("std/io")
 strings = import("std/strings")
 
 fn get_weather(location) {
-    # Get may fail so it returns { "error": Bool, "value": Value }.
+    # Get may fail so it returns { "error": Bool, "value": Any }.
     # The last expression is returned even without the return keyword.
     # A function returns an expression that evaluates to a value and is returned.
     http.get("https://wttr.in/" + location + "?format=3")
@@ -200,7 +151,7 @@ fn main() {
 
     result = get_weather(location)
 
-    # By convention functions that might fail return { "error": Bool, "value": Value }.
+    # By convention functions that might fail return { "error": Bool, "value": Any }.
     # Checking this record for an error is a common pattern in gluonscript.
     # If error is true, value shows its message as a string.
     # Otherwise if error is false, value shows whatever value the function returns.
@@ -216,4 +167,41 @@ fn main() {
 ```
 Output:
 lisbon: 🌦   +14°C
+```
+
+### Example 4
+
+```python
+http = import("std/http")
+io = import("std/io")
+json = import("std/json")
+
+fn fetch(url) {
+    # The ?= operator (error propagation) is similar to Rust's ? operator.
+    # It makes it easy to handle { "error": Bool, "value": Any } return types.
+    # If the value on the right is an error, it propagates the error to the caller.
+    # Otherwise it unwraps value and assigns it to the variable on the left.
+
+    raw_json ?= http.get(url) # Get raw json from server or propagate error.
+    parsed_json ?= json.parse(raw_json) # Parse JSON into a record or propagate error.
+    
+    # Functions using the ?= operator should return { "error": Bool, "value": Any }.
+    # This record is similar to Rust's Result type, but simpler and without generics.
+    { error: false, value: parsed_json }
+}
+
+fn main() {
+    content = fetch("https://catfact.ninja/fact")
+
+    if content.error {
+        io.println("There was an error: " + content.value)
+        return 1
+    }
+
+    io.println(content.value.fact)
+}
+```
+
+```
+A cat can jump 5 times as high as it is tall.
 ```
