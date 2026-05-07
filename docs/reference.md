@@ -82,6 +82,8 @@ Explore the standard library functions.
 [fn cos(number: Int | Float): Float](#fn-cosnumber-int--float-float)<br>
 [fn clamp(value: Int | Float, min: Int | Float, max: Int | Float): Int | Float](#fn-clampvalue-int--float-min-int--float-max-int--float-int--float)<br>
 [fn floor(number: Float): Float](#fn-floornumber-float-float)<br>
+[fn max(a: Int | Float, b: Int | Float): Int | Float](#fn-maxa-int--float-b-int--float-int--float)<br>
+[fn min(a: Int | Float, b: Int | Float): Int | Float](#fn-mina-int--float-b-int--float-int--float)<br>
 [fn round(number: Float): Float](#fn-roundnumber-float-float)<br>
 [fn sin(number: Int | Float): Float](#fn-sinnumber-int--float-float)
 
@@ -296,6 +298,22 @@ All arguments must be of the same type (either all integers or all floating-poin
 ## `fn floor(number: Float): Float`
 
 Returns the largest integer value less than or equal to the given floating-point number, as a floating-point value.
+
+---
+
+## `fn max(a: Int | Float, b: Int | Float): Int | Float`
+
+Returns the greater of the two provided numbers.
+
+Both arguments must be of the same type (either both integers or both floating-point numbers).
+
+---
+
+## `fn min(a: Int | Float, b: Int | Float): Int | Float`
+
+Returns the smaller of the two provided numbers.
+
+Both arguments must be of the same type (either both integers or both floating-point numbers).
 
 ---
 

@@ -10,6 +10,8 @@ pub fn module() -> Result<Value, RuntimeError> {
     map.insert("cos".to_string(), Value::BuiltinFunction(cos));
     map.insert("clamp".to_string(), Value::BuiltinFunction(clamp));
     map.insert("floor".to_string(), Value::BuiltinFunction(floor));
+    map.insert("max".to_string(), Value::BuiltinFunction(max));
+    map.insert("min".to_string(), Value::BuiltinFunction(min));
     map.insert("round".to_string(), Value::BuiltinFunction(round));
     map.insert("sin".to_string(), Value::BuiltinFunction(sin));
 
@@ -211,6 +213,136 @@ pub fn floor(args: Vec<Value>) -> Result<Value, RuntimeError> {
         other => Err(RuntimeError::TypeError {
             expected: "float",
             got: format!("{:?}", other),
+        }),
+    }
+}
+
+pub fn max(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    if args.len() != 2 {
+        return Err(RuntimeError::Arity {
+            expected: 2,
+            got: args.len(),
+        });
+    }
+
+    match args.first() {
+        Some(Value::Float(a)) => {
+            let b = match args.iter().nth(1) {
+                Some(Value::Float(b)) => b,
+
+                Some(other) => {
+                    return Err(RuntimeError::TypeError {
+                        expected: "float",
+                        got: format!("{:?}", other),
+                    });
+                }
+
+                None => {
+                    return Err(RuntimeError::Arity {
+                        expected: 2,
+                        got: 0,
+                    });
+                }
+            };
+
+            Ok(Value::Float(a.max(*b)))
+        }
+
+        Some(Value::Int(a)) => {
+            let b = match args.iter().nth(1) {
+                Some(Value::Int(b)) => b,
+
+                Some(other) => {
+                    return Err(RuntimeError::TypeError {
+                        expected: "int",
+                        got: format!("{:?}", other),
+                    });
+                }
+
+                None => {
+                    return Err(RuntimeError::Arity {
+                        expected: 2,
+                        got: 0,
+                    });
+                }
+            };
+
+            Ok(Value::Int(*a.max(b)))
+        }
+
+        Some(other) => Err(RuntimeError::TypeError {
+            expected: "float/int",
+            got: format!("{:?}", other),
+        }),
+
+        None => Err(RuntimeError::Arity {
+            expected: 2,
+            got: 0,
+        }),
+    }
+}
+
+pub fn min(args: Vec<Value>) -> Result<Value, RuntimeError> {
+    if args.len() != 2 {
+        return Err(RuntimeError::Arity {
+            expected: 2,
+            got: args.len(),
+        });
+    }
+
+    match args.first() {
+        Some(Value::Float(a)) => {
+            let b = match args.iter().nth(1) {
+                Some(Value::Float(b)) => b,
+
+                Some(other) => {
+                    return Err(RuntimeError::TypeError {
+                        expected: "float",
+                        got: format!("{:?}", other),
+                    });
+                }
+
+                None => {
+                    return Err(RuntimeError::Arity {
+                        expected: 2,
+                        got: 0,
+                    });
+                }
+            };
+
+            Ok(Value::Float(a.min(*b)))
+        }
+
+        Some(Value::Int(a)) => {
+            let b = match args.iter().nth(1) {
+                Some(Value::Int(b)) => b,
+
+                Some(other) => {
+                    return Err(RuntimeError::TypeError {
+                        expected: "int",
+                        got: format!("{:?}", other),
+                    });
+                }
+
+                None => {
+                    return Err(RuntimeError::Arity {
+                        expected: 2,
+                        got: 0,
+                    });
+                }
+            };
+
+            Ok(Value::Int(*a.min(b)))
+        }
+
+        Some(other) => Err(RuntimeError::TypeError {
+            expected: "float/int",
+            got: format!("{:?}", other),
+        }),
+
+        None => Err(RuntimeError::Arity {
+            expected: 2,
+            got: 0,
         }),
     }
 }
