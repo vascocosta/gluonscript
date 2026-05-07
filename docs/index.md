@@ -18,12 +18,15 @@ io = import("std/io")
 strings = import("std/strings")
 
 fn main() {
-    message =
-        "hello world"
-        |> strings.upper()
-        |> append("!")
+    list = ["Hi", "World!", "Goodbye"]
 
-    io.println(message)
+    text = list
+        |> slice(0, len(list) - 1)
+        |> strings.join(" ")
+        |> strings.replace("Hi", "Hello")
+        |> strings.upper()
+
+    io.println(text)
 }
 ```
 
